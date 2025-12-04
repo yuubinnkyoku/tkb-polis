@@ -1,18 +1,17 @@
 // Copyright (C) 2012-present, The Authors. This program is free software: you can redistribute it and/or  modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details. You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { handleCreateConversationSubmit, populateConversationsStore } from '../../actions'
-import { isAuthReady } from '../../util/net'
+import { useState, useEffect, useCallback } from 'react'
 
-import Url from '../../util/url'
-import { useAuth } from 'react-oidc-context'
 import { Box, Heading, Button, Text, Link, Image, Close } from 'theme-ui'
-import Conversation from './Conversation'
-import { useLocation, useNavigate } from 'react-router'
-import PolisNet from '../../util/net'
+import { handleCreateConversationSubmit, populateConversationsStore } from '../../actions'
 import { isSuperAdmin } from '../../util/auth'
+import { useAuth } from 'react-oidc-context'
+import { useLocation, useNavigate } from 'react-router'
+import Conversation from './Conversation'
 import Pagination from '../conversation-admin/Pagination'
+import PolisNet, { isAuthReady } from '../../util/net'
+import Url from '../../util/url'
 
 const Conversations = () => {
   const dispatch = useDispatch()
@@ -20,10 +19,10 @@ const Conversations = () => {
   const navigate = useNavigate()
   const { isAuthenticated, isLoading } = useAuth()
   const { conversations, loading, error } = useSelector((state) => state.conversations)
-  
+
   const userState = useSelector((state) => state.user)
   const superAdmin = isSuperAdmin(userState)
-  
+
   const [interstitialVisible, setInterstitialVisible] = useState(false)
   const [activeView, setActiveView] = useState('my') // 'my' | 'all'
   const [allConversations, setAllConversations] = useState(null)
