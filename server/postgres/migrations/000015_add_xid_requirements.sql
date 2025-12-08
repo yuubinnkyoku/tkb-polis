@@ -50,6 +50,11 @@ ADD CONSTRAINT xids_zid_fkey
 ALTER TABLE xids
 ADD COLUMN pid INTEGER;
 
+-- Drop the incorrect foreign key constraint
+ALTER TABLE xids
+DROP CONSTRAINT IF EXISTS xids_pid_fkey;
+
+-- Add the corrected foreign key constraint using composite key
 ALTER TABLE xids
 ADD CONSTRAINT xids_pid_fkey
     FOREIGN KEY (zid, pid) REFERENCES participants(zid, pid) ON DELETE SET NULL;
