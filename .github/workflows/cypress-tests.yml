@@ -66,7 +66,11 @@ jobs:
 
     - name: Build Docker images
       run: |
-        # Build all services defined in test compose file
+        # Build postgres with --no-cache to ensure latest migrations are used
+        # Docker layer caching can cause old migration files to persist
+        docker compose -f docker-compose.test.yml --env-file test.env build --no-cache postgres
+        
+        # Build remaining services (caching OK for these)
         docker compose -f docker-compose.test.yml --env-file test.env build
 
     - name: Start services
@@ -92,6 +96,32 @@ jobs:
         
         echo "Checking server API..."
         curl -f http://localhost/api/v3/participationInit || true
+
+    - name: Verify database schema
+      run: |
+        # Verify critical columns exist in the database
+        # This catches migration failures early
+        echo "Checking database schema..."
+        
+        # Check for topics_enabled column (added in migration 000016)
+        docker compose -f docker-compose.test.yml exec -T postgres \
+          psql -U postgres -d polis-test -c \
+          "SELECT column_name FROM information_schema.columns WHERE table_name = 'conversations' AND column_name = 'topics_enabled';" \
+          | grep -q "topics_enabled" && echo "✅ topics_enabled column exists" || { echo "❌ topics_enabled column MISSING - migrations may have failed"; exit 1; }
+        
+        # Check for xid_required column (added in migration 000015)
+        docker compose -f docker-compose.test.yml exec -T postgres \
+          psql -U postgres -d polis-test -c \
+          "SELECT column_name FROM information_schema.columns WHERE table_name = 'conversations' AND column_name = 'xid_required';" \
+          | grep -q "xid_required" && echo "✅ xid_required column exists" || { echo "❌ xid_required column MISSING - migrations may have failed"; exit 1; }
+        
+        echo "✅ Database schema verification passed"
+
+    - name: Show postgres initialization logs
+      if: always()
+      run: |
+        echo "=== Postgres container logs (shows migration execution) ==="
+        docker compose -f docker-compose.test.yml logs postgres | head -200
 
     - name: Show service logs
       if: always()
