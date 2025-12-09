@@ -223,7 +223,8 @@ export async function getTranslations(
   queryParam?: string | null,
   acceptLanguageHeader?: string | null
 ): Promise<Translations> {
-  if (translationsStore) {
+  // Only use cache on client side to avoid sharing state between requests on server
+  if (typeof window !== "undefined" && translationsStore) {
     return translationsStore
   }
 
@@ -242,8 +243,10 @@ export async function getTranslations(
       Object.assign(finalStrings, targetStrings) // Merges target strings, overwriting English keys.
     }
 
-    translationsStore = finalStrings
-    return translationsStore
+    if (typeof window !== "undefined") {
+      translationsStore = finalStrings
+    }
+    return finalStrings
   } catch (error) {
     console.error("I18n Error: Could not load translation files.", error)
     // Fallback to an empty object or handle error appropriately
