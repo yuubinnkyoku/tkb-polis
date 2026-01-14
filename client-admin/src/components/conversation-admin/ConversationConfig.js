@@ -4,6 +4,7 @@ import { Heading, Box, Text } from 'theme-ui'
 import { useCallback, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import emoji from 'react-easy-emoji'
+import f from '../../strings/strings'
 
 import { CheckboxField } from './CheckboxField'
 import { useConversationData } from '../../util/conversation_data'
@@ -54,19 +55,27 @@ const ConversationConfig = () => {
           lineHeight: 'body',
           mb: [3, null, 4]
         }}>
-        Configure
+        {f('config_title')}
       </Heading>
       <Box sx={{ mb: [4] }}>
-        {loading ? <Text>{emoji('💾')} Saving</Text> : <Text>{emoji('⚡')} Up to date</Text>}
-        {error ? <Text>Error Saving</Text> : null}
+        {loading ? (
+          <Text>
+            {emoji('💾')} {f('config_saving')}
+          </Text>
+        ) : (
+          <Text>
+            {emoji('⚡')} {f('config_uptodate')}
+          </Text>
+        )}
+        {error ? <Text>{f('config_error_saving')}</Text> : null}
       </Box>
 
-      <CheckboxField field="is_active" label="Conversation Is Open">
-        Conversation is open. Unchecking disables both voting and commenting.
+      <CheckboxField field="is_active" label={f('config_is_active_label')}>
+        {f('config_is_active_desc')}
       </CheckboxField>
 
       <Box sx={{ mb: [3] }}>
-        <Text sx={{ display: 'block', mb: [2] }}>Topic</Text>
+        <Text sx={{ display: 'block', mb: [2] }}>{f('config_topic_label')}</Text>
         <input
           ref={topicRef}
           sx={{
@@ -88,7 +97,7 @@ const ConversationConfig = () => {
       </Box>
 
       <Box sx={{ mb: [3] }}>
-        <Text sx={{ display: 'block', mb: [2] }}>Description</Text>
+        <Text sx={{ display: 'block', mb: [2] }}>{f('config_description_label')}</Text>
         <textarea
           ref={descriptionRef}
           sx={{
@@ -118,7 +127,7 @@ const ConversationConfig = () => {
           lineHeight: 'body',
           my: [3, null, 4]
         }}>
-        Seed Comments
+        {f('config_seed_comments_label')}
       </Heading>
       <ModerateCommentsSeed params={{ conversation_id: conversationData.conversation_id }} />
 
@@ -129,42 +138,38 @@ const ConversationConfig = () => {
           lineHeight: 'body',
           my: [3, null, 4]
         }}>
-        Customize the user interface
+        {f('config_customize_ui_label')}
       </Heading>
 
-      <CheckboxField field="vis_type" label="Visualization" isIntegerBool>
-        Participants can see the visualization
+      <CheckboxField field="vis_type" label={f('config_vis_label')} isIntegerBool>
+        {f('config_vis_desc')}
       </CheckboxField>
 
-      <CheckboxField field="write_type" label="Comment form" isIntegerBool>
-        Participants can submit comments
+      <CheckboxField field="write_type" label={f('config_write_label')} isIntegerBool>
+        {f('config_write_desc')}
       </CheckboxField>
 
-      <CheckboxField field="help_type" label="Help text" isIntegerBool>
-        Show explanation text above voting and visualization
+      <CheckboxField field="help_type" label={f('config_help_label')} isIntegerBool>
+        {f('config_help_desc')}
       </CheckboxField>
 
       <CheckboxField
         field="subscribe_type"
-        label="Prompt participants to subscribe to updates"
+        label={f('config_subscribe_label')}
         isIntegerBool>
-        Prompt participants to subscribe to updates. A prompt is shown to users once they finish
-        voting on all available comments. If enabled, participants may optionally provide their
-        email address to receive notifications when there are new comments to vote on.
+        {f('config_subscribe_desc')}
       </CheckboxField>
 
-      <CheckboxField field="strict_moderation">
-        No comments shown without moderator approval
+      <CheckboxField field="strict_moderation" label={f('config_strict_mod_label')}>
+        {f('config_strict_mod_desc')}
       </CheckboxField>
 
-      <CheckboxField field="treevite_enabled" label="Enable Invite Tree">
-        [EXPERIMENTAL FEATURE] Enable Invite Tree. Nobody can participate without an invite. Invites
-        are managed in waves.
+      <CheckboxField field="treevite_enabled" label={f('config_invite_tree_label')}>
+        {f('config_invite_tree_desc')}
       </CheckboxField>
 
-      <CheckboxField field="importance_enabled" label="Importance Enabled">
-        [EXPERIMENTAL FEATURE] Participants can see the &quot;This comment is important&quot;
-        checkbox
+      <CheckboxField field="importance_enabled" label={f('config_importance_label')}>
+        {f('config_importance_desc')}
       </CheckboxField>
     </Box>
   )

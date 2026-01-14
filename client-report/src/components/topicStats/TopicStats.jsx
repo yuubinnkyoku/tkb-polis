@@ -10,6 +10,7 @@ import LayerDistributionModal from "./LayerDistributionModal.jsx";
 import TopicOverviewScatterplot from "./visualizations/TopicOverviewScatterplot.jsx";
 import TopicTables from "./visualizations/TopicTables.jsx";
 import TopicPage from "../topicPage/TopicPage.jsx";
+import f from "../../strings/strings";
 
 const TopicStats = ({ conversation, report_id: propsReportId, math, comments, ptptCount, formatTid, voteColors, token }) => {
   const { report_id } = useReportId(propsReportId);
@@ -24,17 +25,17 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedLayer, setSelectedLayer] = useState(null);
   // Removed showTopicPage and selectedTopicKey state - now using URL routing
-  
+
   // Calculate metrics from comments data
   const calculateMetricsFromComments = (commentTids, allComments) => {
     if (!commentTids || !allComments) return null;
-    
+
     // Create a map for quick lookup
     const commentMap = {};
     allComments.forEach(c => {
       commentMap[c.tid] = c;
     });
-    
+
     let totalVotes = 0;
     let totalAgree = 0;
     let totalDisagree = 0;
@@ -42,22 +43,22 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
     let consensusSum = 0;
     let divisiveSum = 0;
     let commentCount = 0;
-    
+
     commentTids.forEach(tid => {
       const comment = commentMap[tid];
       if (!comment) return;
-      
+
       commentCount++;
       const agreeCount = comment.agree_count || 0;
       const disagreeCount = comment.disagree_count || 0;
       const passCount = comment.pass_count || 0;
       const voteCount = agreeCount + disagreeCount + passCount;
-      
+
       totalVotes += voteCount;
       totalAgree += agreeCount;
       totalDisagree += disagreeCount;
       totalPass += passCount;
-      
+
       // Calculate per-comment consensus
       const activeVotes = agreeCount + disagreeCount;
       if (activeVotes > 0) {
@@ -65,13 +66,13 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
         const disagreeRate = disagreeCount / activeVotes;
         const consensus = Math.max(agreeRate, disagreeRate);
         consensusSum += consensus * voteCount;
-        
+
         // Divisiveness: how evenly split the votes are
         const divisiveness = 1 - Math.abs(agreeRate - disagreeRate);
         divisiveSum += divisiveness * voteCount;
       }
     });
-    
+
     return {
       comment_count: commentCount,
       total_votes: totalVotes,
@@ -83,7 +84,7 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
       vote_density: commentCount > 0 ? totalVotes / commentCount : 0,
     };
   };
-  
+
 
 
   useEffect(() => {
@@ -92,21 +93,21 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch topics from Delphi endpoint
         const topicsResponse = await net.polisGet("/api/v3/delphi", {
           report_id: report_id,
         });
-        
+
         // Fetch topic statistics
         const statsResponse = await net.polisGet("/api/v3/topicStats", {
           report_id: report_id,
         });
-        
+
         if (topicsResponse.status === "success") {
           setTopicsData(topicsResponse.runs);
         }
-        
+
         if (statsResponse.status === "success" && comments) {
           // Calculate metrics client-side using comments data
           const enrichedStats = {};
@@ -120,11 +121,11 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
           });
           setStatsData(enrichedStats);
         }
-        
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching topic stats:", err);
-        setError(err.message || "Failed to load topic statistics");
+        setError(err.message || f("topic_stats_fail_load"));
         setLoading(false);
       }
     };
@@ -137,7 +138,7 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
       <div style={{ margin: "0px 10px", maxWidth: "1200px", padding: "20px" }}>
         <Heading conversation={conversation} />
         <div style={{ marginTop: 40 }}>
-          <p>Loading topic statistics...</p>
+          <p>{f("topic_stats_loading")}</p>
         </div>
       </div>
     );
@@ -162,15 +163,15 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
     <div style={{ margin: "0px 10px", maxWidth: "1200px", padding: "20px" }} data-testid="topic-stats">
       <Heading conversation={conversation} />
       <div style={{ marginTop: 40 }}>
-        <h2>Topic Statistics</h2>
-        
+        <h2>{f("topic_stats_title")}</h2>
+
         {latestRun ? (
           <div style={{ marginTop: 20 }}>
             <p>Model: {latestRun.model_name}</p>
-            <p>Generated: {new Date(latestRun.created_at).toLocaleString()}</p>
-            
+            <p>{f("collective_generated")}: {new Date(latestRun.created_at).toLocaleString()}</p>
+
             {/* Group-aware consensus scatterplot */}
-            <TopicOverviewScatterplot 
+            <TopicOverviewScatterplot
               latestRun={latestRun}
               statsData={statsData}
               math={math}
@@ -179,9 +180,9 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
                 window.location.href = `/topicStats/${report_id}/${topic.topic_key.replace(/#/g, '%23')}`;
               }}
             />
-            
-            
-            <TopicTables 
+
+
+            <TopicTables
               latestRun={latestRun}
               statsData={statsData}
               math={math}
@@ -207,11 +208,11 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
               }}
             />
           </div>
-        ) : <p>No data available. To generate, run a delphi analysis on the <a target="_blank" rel="noreferrer" href={`/commentsReport/${report_id}`}>Comments Report page.</a></p>}
-        
+        ) : <p>{f("topic_stats_no_data")}<a target="_blank" rel="noreferrer" href={`/commentsReport/${report_id}`}>Comments Report page.</a></p>}
+
         <Footer />
       </div>
-      
+
       <CollectiveStatementModal
         isOpen={modalOpen}
         onClose={() => {
@@ -229,7 +230,7 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
         voteColors={voteColors}
         token={token}
       />
-      
+
       <AllCommentsModal
         isOpen={scatterModalOpen}
         onClose={() => {
@@ -246,7 +247,7 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
         formatTid={formatTid}
         voteColors={voteColors}
       />
-      
+
       <BeeswarmModal
         isOpen={beeswarmModalOpen}
         onClose={() => {
@@ -263,7 +264,7 @@ const TopicStats = ({ conversation, report_id: propsReportId, math, comments, pt
         formatTid={formatTid}
         voteColors={voteColors}
       />
-      
+
       <LayerDistributionModal
         isOpen={layerModalOpen}
         onClose={() => {

@@ -5,6 +5,7 @@ import { useReportId } from "../framework/useReportId";
 import CommentList from "../lists/commentList.jsx";
 import { jwtDecode } from "jwt-decode"
 import "./CommentsReport.css";
+import f from "../../strings/strings";
 
 const decodedJwt = (token) => {
   if (token) {
@@ -70,20 +71,20 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
           <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "column" }}>
             {hasDelphiEnabled(authToken) ? (
               <>
-                <h4>Are you sure you want to run a new Delphi analysis? This will erase previous results, and may take several minutes.</h4>
-                <button style={{ marginBottom: "1em", color: "#fff", backgroundColor: "#f44336", padding: "8px 16px", cursor: "pointer", border: "0", borderRadius: "4px", fontWeight: "bold" }} onClick={() => setConfirmDelphiRunModalVisible(false)}>Cancel</button>
-                <button className="batch-report-button" onClick={confirmDelphiRunModalVisible === "batch" ? handleGenerateNarrativeReport : handleJobFormSubmit}>Run Analysis</button> {/* eslint-disable-line quotes */}
+                <h4>{f("comments_report_run_delphi_confirm")}</h4>
+                <button style={{ marginBottom: "1em", color: "#fff", backgroundColor: "#f44336", padding: "8px 16px", cursor: "pointer", border: "0", borderRadius: "4px", fontWeight: "bold" }} onClick={() => setConfirmDelphiRunModalVisible(false)}>{f("comments_report_cancel")}</button>
+                <button className="batch-report-button" onClick={confirmDelphiRunModalVisible === "batch" ? handleGenerateNarrativeReport : handleJobFormSubmit}>{f("comments_report_run_analysis")}</button> {/* eslint-disable-line quotes */}
               </>
-              ) : (
+            ) : (
               <p>
-                Discover more with Delphi - advanced data analysis and AI - Upgrade at <a target="_blank" rel="noreferrer" href="https://pro.pol.is">pro.pol.is</a> to run a new analysis.
-                <button style={{ marginTop: "1em", color: "#fff", backgroundColor: "#4caf50", padding: "8px 16px", cursor: "pointer", border: "0", borderRadius: "4px", fontWeight: "bold" }} onClick={() => setConfirmDelphiRunModalVisible(false)}>Close</button>
+                {f("comments_report_discover_delphi")} <a target="_blank" rel="noreferrer" href="https://pro.pol.is">pro.pol.is</a> to run a new analysis.
+                <button style={{ marginTop: "1em", color: "#fff", backgroundColor: "#4caf50", padding: "8px 16px", cursor: "pointer", border: "0", borderRadius: "4px", fontWeight: "bold" }} onClick={() => setConfirmDelphiRunModalVisible(false)}>{f("comments_report_close")}</button>
               </p>
             )}
           </div>
         </div>
       </div>
-      ) : null;
+    ) : null;
   };
 
   useEffect(() => {
@@ -107,22 +108,22 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
             setSelectedRunKey(runKeys[0]);
           } else if (response.available_tables) {
             setError(
-              `DynamoDB connected but the required table doesn't exist yet. This is normal until the Delphi pipeline has been run for this conversation.`
+              f("comments_report_no_table")
             );
           } else if (response.error) {
             setError(`Error: ${response.error}`);
           } else {
-            setError("No LLM topic data available yet");
+            setError(f("comments_report_no_data"));
           }
         } else {
-          setError("Failed to retrieve LLM topics");
+          setError(f("comments_report_fail_retrieve"));
         }
 
         setLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching LLM topics:", err);
-        setError("Failed to connect to the Delphi endpoint");
+        setError(f("comments_report_fail_connect"));
         setLoading(false);
       });
 
@@ -207,14 +208,14 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
     net.polisGet("/api/v3/delphi/logs", {
       job_id: visualizationJobs.find(job => job.status === "PROCESSING" && !job.jobId.includes("batch_report_"))?.jobId || jobInProgress?.job_id
     })
-    .then(response => {
-      setProcessedLogs(response);
-      const isFinished = response?.find(m => m.message.includes("Results stored in DynamoDB for conversation"));
-      if (isFinished) {
-        setJobInProgress(false);
-        window.location.reload();
-      }
-    });
+      .then(response => {
+        setProcessedLogs(response);
+        const isFinished = response?.find(m => m.message.includes("Results stored in DynamoDB for conversation"));
+        if (isFinished) {
+          setJobInProgress(false);
+          window.location.reload();
+        }
+      });
   };
 
   // Handle job form submission
@@ -266,7 +267,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
         console.error("Error creating job:", err);
         setJobCreationResult({
           success: false,
-          message: `Error creating job: ${err.error ||err.message || "Unknown error"}`,
+          message: `Error creating job: ${err.error || err.message || "Unknown error"}`,
         });
       })
       .finally(() => {
@@ -322,17 +323,17 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
     }
 
     // First, try to find a completed job with visualizations
-    const completedJobWithViz = visualizationJobs.find(job => 
-      job.status === "COMPLETED" && 
-      job.visualizations && 
-      Array.isArray(job.visualizations) && 
+    const completedJobWithViz = visualizationJobs.find(job =>
+      job.status === "COMPLETED" &&
+      job.visualizations &&
+      Array.isArray(job.visualizations) &&
       job.visualizations.length > 0
     );
-    
+
     if (completedJobWithViz) {
       return completedJobWithViz;
     }
-    
+
     // If no completed job with visualizations, return the first job
     return visualizationJobs[0];
   };
@@ -345,7 +346,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
     }
 
     const layerMap = new Map();
-    
+
     // Get layers from visualizations
     bestJob.visualizations
       .filter((vis) => vis && vis.type === "interactive")
@@ -372,14 +373,14 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
   // Get available report sections for dropdown - combines topic data and narrative reports  
   const getAvailableReportSections = () => {
     const sections = [];
-    
+
     // If we have topic data, always show sections (with status indicators)
     // This ensures consistent dropdown behavior like TopicReport
     if (topicData && topicData.runs && Object.keys(topicData.runs).length > 0) {
       const latestRun = Object.values(topicData.runs).reduce((latest, run) => {
         return !latest || new Date(run.created_at) > new Date(latest.created_at) ? run : latest;
       }, null);
-      
+
       const jobUuid = latestRun?.job_uuid;
 
       if (showGlobalSections) {
@@ -394,7 +395,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
           // Check what keys actually exist in the narrative reports (same logic as TopicSectionsBuilder)
           const longFormatKey = narrativeRunInfo?.current_job_id ? `${narrativeRunInfo.current_job_id}_global_${key}` : null;
           const shortFormatKey = `global_${key}`;
-          
+
           let sectionKey;
           if (narrativeReports && Object.keys(narrativeReports).length > 0) {
             // Check which format exists in the data
@@ -411,10 +412,10 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
           } else {
             sectionKey = shortFormatKey;
           }
-          
+
           // Check if narrative report exists
           const hasNarrative = !!narrativeReports[sectionKey];
-          
+
           sections.push({
             key: sectionKey,
             title: title + (hasNarrative ? "" : " (pending narrative)"),
@@ -426,7 +427,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
         // Show topic sections for the selected layer
         if (latestRun.topics_by_layer && latestRun.topics_by_layer[selectedLayer]) {
           const layerTopics = latestRun.topics_by_layer[selectedLayer];
-          
+
           Object.entries(layerTopics).forEach(([clusterId, topic]) => {
             // Extract section key from topic_key, converting # to _ (same logic as TopicReport)
             let sectionKey;
@@ -437,10 +438,10 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
               // Fallback: construct from jobUuid
               sectionKey = `${jobUuid}_${selectedLayer}_${clusterId}`;
             }
-            
+
             // Check if narrative report exists
             const hasNarrative = !!narrativeReports[sectionKey];
-            
+
             sections.push({
               key: sectionKey,
               title: topic.topic_name + (hasNarrative ? "" : " (pending narrative)"),
@@ -453,7 +454,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
       }
     }
     // No fallback needed - we require topic data for consistent behavior
-    
+
     return sections.sort((a, b) => a.title.localeCompare(b.title));
   };
 
@@ -462,7 +463,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
   // Auto-select cross-group consensus when available
   useEffect(() => {
     if (!selectedReportSection && availableReportSections.length > 0) {
-      const crossGroupSection = availableReportSections.find(section => 
+      const crossGroupSection = availableReportSections.find(section =>
         section.title.includes("Cross-Group Consensus")
       );
       if (crossGroupSection) {
@@ -496,7 +497,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
             Global Insights
             <span className="layer-description"> (Cross-cutting themes)</span>
           </button>
-          
+
           {/* Layer-specific topic buttons */}
           {availableLayers.map((layer) => (
             <button
@@ -510,9 +511,9 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
             >
               Layer {layer.layerId}: {layer.topicCount} Topic{layer.topicCount !== 1 ? 's' : ''}
               <span className="layer-description"> {/* eslint-disable-line quotes */}
-                {layer.layerId === 0 ? " (Finest)" : 
-                 layer.layerId === availableLayers[availableLayers.length - 1].layerId ? " (Coarsest)" : 
-                 " (Medium)"}
+                {layer.layerId === 0 ? " (Finest)" :
+                  layer.layerId === availableLayers[availableLayers.length - 1].layerId ? " (Coarsest)" :
+                    " (Medium)"}
               </span>
             </button>
           ))}
@@ -557,23 +558,23 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
   // Render visualization section
   const renderVisualizations = () => {
     if (visualizationsLoading) {
-      return <div className="loading">Loading visualizations...</div>;
+      return <div className="loading">{f("comments_report_loading_viz")}</div>;
     }
 
     return (
       <>
         <div className="section-header-actions">
           <button className="create-job-button" onClick={() => setConfirmDelphiRunModalVisible(true)}>
-            Run New Delphi Analysis
+            {f("comments_report_run_new")}
           </button>
         </div>
 
         {!visualizationJobs ||
-        !Array.isArray(visualizationJobs) ||
-        visualizationJobs.length === 0 ? (
+          !Array.isArray(visualizationJobs) ||
+          visualizationJobs.length === 0 ? (
           <div className="info-message">
             <p>
-              No visualizations available yet. Click &quot;Run New Delphi Analysis&quot; to create a new job.
+              {f("comments_report_no_viz")}
             </p>
           </div>
         ) : (
@@ -583,68 +584,68 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
               return bestJob && (
                 <div className="visualization-job">
                   <div className="job-header">
-                    <h3>Interactive Topics Visualization (all comments)</h3>
+                    <h3>{f("comments_report_interactive_viz")}</h3>
                     <div className="job-meta">
                       <span className={`job-status status-${bestJob.status}`}>
                         {bestJob.status}
                       </span>
                       <span className="job-date">
-                        Created: {new Date(bestJob.createdAt).toLocaleString()}
+                        {f("comments_report_created")} {new Date(bestJob.createdAt).toLocaleString()}
                       </span>
                     </div>
                   </div>
 
                   {bestJob.visualizations &&
-                  Array.isArray(bestJob.visualizations) &&
-                  bestJob.visualizations.length > 0 ? (
-                  <div className="visualizations-grid">
-                    {/* Show selected layer visualization */}
-                    {bestJob.visualizations
-                      .filter((vis) => vis && vis.type === "interactive" && vis.layerId === selectedLayer)
-                      .map((vis) => (
-                        <div key={vis.key} className="visualization-card">
-                          <h4>Layer {vis.layerId} Interactive Visualization</h4>
-                          <div className="iframe-container">
-                            <iframe
-                              src={vis.url}
-                              title={`Layer ${vis.layerId} visualization`}
-                              width="100%"
-                              height="800"
-                              frameBorder="0"
-                            ></iframe>
+                    Array.isArray(bestJob.visualizations) &&
+                    bestJob.visualizations.length > 0 ? (
+                    <div className="visualizations-grid">
+                      {/* Show selected layer visualization */}
+                      {bestJob.visualizations
+                        .filter((vis) => vis && vis.type === "interactive" && vis.layerId === selectedLayer)
+                        .map((vis) => (
+                          <div key={vis.key} className="visualization-card">
+                            <h4>{f("comments_report_interactive_layer_viz")}</h4>
+                            <div className="iframe-container">
+                              <iframe
+                                src={vis.url}
+                                title={`Layer ${vis.layerId} visualization`}
+                                width="100%"
+                                height="800"
+                                frameBorder="0"
+                              ></iframe>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
 
-                    {bestJob.visualizations
-                      .filter(
-                        (vis) =>
-                          vis &&
-                          (vis.type === "static_png" || vis.type === "presentation_png") &&
-                          vis.layerId === selectedLayer
-                      )
-                      .map((vis) => (
-                        <div key={vis.key} className="visualization-card">
-                          <h4>Layer {vis.layerId} Static Visualization</h4>
-                          <div className="img-container">
-                            <img
-                              src={vis.url}
-                              alt={`Layer ${vis.layerId} visualization`}
-                              width="100%"
-                            />
+                      {bestJob.visualizations
+                        .filter(
+                          (vis) =>
+                            vis &&
+                            (vis.type === "static_png" || vis.type === "presentation_png") &&
+                            vis.layerId === selectedLayer
+                        )
+                        .map((vis) => (
+                          <div key={vis.key} className="visualization-card">
+                            <h4>{f("comments_report_static_layer_viz")}</h4>
+                            <div className="img-container">
+                              <img
+                                src={vis.url}
+                                alt={`Layer ${vis.layerId} visualization`}
+                                width="100%"
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <div className="no-visualizations-message">
-                    <p>No visualizations available for this job yet.</p>
-                    <p className="help-text">
-                      Visualizations may take a few minutes to generate. You can refresh the page to
-                      check for updates.
-                    </p>
-                  </div>
-                )}
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="no-visualizations-message">
+                      <p>{f("comments_report_no_viz_job")}</p>
+                      <p className="help-text">
+                        Visualizations may take a few minutes to generate. You can refresh the page to
+                        check for updates.
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })()}
@@ -657,7 +658,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
   // Render narrative reports section with dropdown
   const renderNarrativeReports = () => {
     if (narrativeLoading && topicDataLoading) {
-      return <div className="loading">Loading topic and narrative data...</div>;
+      return <div className="loading">{f("comments_report_loading_topic_narrative")}</div>;
     }
 
     const availableSections = getAvailableReportSections();
@@ -667,7 +668,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
       return (
         <div className="info-message">
           <p>
-            No topic or narrative data available yet. Run a Delphi analysis to generate topics and narratives.
+            {f("comments_report_no_topic_narrative")}
           </p>
         </div>
       );
@@ -676,50 +677,50 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
     return (
       <div className="narrative-reports-container">
         {narrativeRunInfo &&
-            narrativeRunInfo.available &&
-            narrativeRunInfo.available.length > 0 && (
-              <div className="run-info-banner">
-                <p>
-                  Showing reports for Job ID:{" "}
-                  <strong>{narrativeRunInfo.current_job_id}</strong>
-                  {(() => {
-                    const currentRunDetails = narrativeRunInfo.available.find(
-                      (run) => run.job_id === narrativeRunInfo.current_job_id
-                    );
-                    if (currentRunDetails && currentRunDetails.latest_timestamp) {
-                      return ` (Generated: ${new Date(
-                        currentRunDetails.latest_timestamp
-                      ).toLocaleString()})`; // eslint-disable-line quotes
-                    }
-                    return "";
-                  })()}
-                  . ({narrativeRunInfo.available.length} run
-                  {narrativeRunInfo.available.length !== 1 ? "s" : ""} available - showing most
-                  recent)
-                </p>
-              </div>
-            )}
+          narrativeRunInfo.available &&
+          narrativeRunInfo.available.length > 0 && (
+            <div className="run-info-banner">
+              <p>
+                Showing reports for Job ID:{" "}
+                <strong>{narrativeRunInfo.current_job_id}</strong>
+                {(() => {
+                  const currentRunDetails = narrativeRunInfo.available.find(
+                    (run) => run.job_id === narrativeRunInfo.current_job_id
+                  );
+                  if (currentRunDetails && currentRunDetails.latest_timestamp) {
+                    return ` (Generated: ${new Date(
+                      currentRunDetails.latest_timestamp
+                    ).toLocaleString()})`; // eslint-disable-line quotes
+                  }
+                  return "";
+                })()}
+                . ({narrativeRunInfo.available.length} run
+                {narrativeRunInfo.available.length !== 1 ? "s" : ""} available - showing most
+                recent)
+              </p>
+            </div>
+          )}
         {/* Report section dropdown with enhanced status indicators */}
         <div className="report-selector">
-          <select 
-            value={selectedReportSection} 
+          <select
+            value={selectedReportSection}
             onChange={handleReportSectionChange}
           >
-            <option value="">Select a report section...</option> {/* eslint-disable-line quotes */}
+            <option value="">{f("comments_report_select_section")}</option> {/* eslint-disable-line quotes */}
             {availableSections.map(section => (
               <option key={section.key} value={section.key}>
                 {section.title}
               </option>
             ))}
           </select>
-          
+
           {/* Status summary */}
           <div className="section-status-summary">
             <span className="status-indicator">
-              {availableSections.filter(s => s.hasTopicData).length} topics identified
+              {availableSections.filter(s => s.hasTopicData).length} {f("comments_report_topics_identified")}
             </span>
             <span className="status-indicator">
-              {availableSections.filter(s => s.hasNarrative).length} narratives generated
+              {availableSections.filter(s => s.hasNarrative).length} {f("comments_report_narratives_generated")}
             </span>
           </div>
         </div>
@@ -734,7 +735,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
   const renderSelectedReport = () => {
     const availableSections = getAvailableReportSections();
     const selectedSection = availableSections.find(s => s.key === selectedReportSection);
-    
+
     if (!selectedSection) return null;
 
     const report = narrativeReports[selectedReportSection];
@@ -743,31 +744,31 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
     return (
       <div key={selectedReportSection} className="report-section">
         <h3>{sectionTitle}</h3>
-        
+
         {/* Enhanced metadata section showing both topic and narrative info */}
         <div className="report-metadata">
           <div className="metadata-row">
-            <span className="metadata-label">Topic Status:</span>
+            <span className="metadata-label">{f("comments_report_topic_status")}</span>
             <span className={`status-badge ${selectedSection.hasTopicData ? "available" : "missing"}`}>
-              {selectedSection.hasTopicData ? "Identified" : "Not Available"}
+              {selectedSection.hasTopicData ? f("comments_report_topic_identified") : f("comments_report_topic_not_available")}
             </span>
           </div>
           <div className="metadata-row">
-            <span className="metadata-label">Narrative Status:</span>
+            <span className="metadata-label">{f("comments_report_narrative_status")}</span>
             <span className={`status-badge ${selectedSection.hasNarrative ? "available" : "pending"}`}>
-              {selectedSection.hasNarrative ? "Generated" : "Pending"}
+              {selectedSection.hasNarrative ? f("comments_report_narrative_generated") : f("comments_report_narrative_pending")}
             </span>
           </div>
           {report && (
             <div className="metadata-row">
-              <span className="metadata-label">Generated:</span>
+              <span className="metadata-label">{f("comments_report_created")}</span>
               <span>{new Date(report.timestamp).toLocaleString()}</span>
               <span> | Model: {report.model || "N/A"}</span>
             </div>
           )}
           {selectedSection.topicMetadata && (
             <div className="metadata-row">
-              <span className="metadata-label">Topic Info:</span>
+              <span className="metadata-label">{f("comments_report_topic_info")}</span>
               <span>Generated by {selectedSection.topicMetadata.model_name} on {selectedSection.topicMetadata.created_at?.substring(0, 10)}</span>
             </div>
           )}
@@ -777,131 +778,131 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
             // Show narrative content if available
             if (report && report.report_data) {
               if (report.errors)
-              return (
-                <p>Not enough data has been provided for analysis, please check back later</p>
-              );
+                return (
+                  <p>{f("comments_report_not_enough_data")}</p>
+                );
 
-            if (
-              typeof report.report_data !== "string" ||
-              !report.report_data.trim().startsWith("{") ||
-              !report.report_data.trim().endsWith("}")
-            ) {
-              return (
-                <article style={{ maxWidth: "600px" }}>
-                  <h5>Report data is not in the expected JSON format.</h5>
-                  <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                    {report.report_data}
-                  </pre>
-                </article>
-              );
-            }
-
-            try {
-              const respData = JSON.parse(jsonrepair(report.report_data));
-
-              const extractCitationsForThisSection = (data) => {
-                const collectedCitations = [];
-
-                if (data?.paragraphs) {
-                  data.paragraphs.forEach((paragraph) => {
-                    if (paragraph?.sentences) {
-                      paragraph.sentences.forEach((sentence) => {
-                        if (sentence?.clauses) {
-                          sentence.clauses.forEach((clause) => {
-                            if (clause?.citations && Array.isArray(clause.citations)) {
-                              clause.citations.forEach((citation) => {
-                                if (typeof citation === "number") {
-                                  collectedCitations.push(citation);
-                                }
-                              });
-                            }
-                          });
-                        }
-                      });
-                    }
-                  });
-                }
-                return [...new Set(collectedCitations)];
-              };
-
-              const sectionCitationIds = extractCitationsForThisSection(respData);
-
-              return (
-                <div className="narrative-layout-container">
-                  <article className="narrative-text-content">
-                    {respData?.paragraphs?.map((pSection) => (
-                      <div key={pSection.id}>
-                        <h5>{pSection.title}</h5>
-                        {pSection.sentences.map((sentence, idx) => (
-                          <p key={idx}>
-                            {sentence.clauses.map((clause, cIdx) => (
-                              <span key={cIdx}>
-                                {clause.text}
-                                {clause.citations
-                                  ?.filter((c) => typeof c === "number")
-                                  .map((citation, citIdx, arr) => (
-                                    <sup key={citIdx}>
-                                      {citation}
-                                      {citIdx < arr.length - 1 ? ", " : ""}
-                                    </sup>
-                                  ))}
-                                {cIdx < sentence.clauses.length - 1 ? " " : ""}
-                              </span>
-                            ))}
-                          </p>
-                        ))}
-                      </div>
-                    ))}
+              if (
+                typeof report.report_data !== "string" ||
+                !report.report_data.trim().startsWith("{") ||
+                !report.report_data.trim().endsWith("}")
+              ) {
+                return (
+                  <article style={{ maxWidth: "600px" }}>
+                    <h5>{f("comments_report_json_error")}</h5>
+                    <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+                      {report.report_data}
+                    </pre>
                   </article>
+                );
+              }
 
-                  {sectionCitationIds.length > 0 && (
-                    <div className="narrative-comments-column">
-                      <h5>Referenced Comments</h5>
-                      <CommentList
-                        conversation={conversation}
-                        ptptCount={ptptCount}
-                        math={math}
-                        formatTid={formatTid}
-                        tidsToRender={sectionCitationIds}
-                        comments={comments}
-                        voteColors={voteColors}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            } catch (error) {
-              console.error(
-                `[${selectedReportSection}] Error processing narrative report section:`,
-                error,
-                "Report data was:",
-                report.report_data
-              );
-              return (
-                <article style={{ maxWidth: "600px" }}>
-                  <h5>An error occurred while processing this report section.</h5>
-                  <pre>{error.message}</pre>
-                  <p>Problematic data for section {selectedReportSection}:</p>
-                  <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                    {report.report_data}
-                  </pre>
-                </article>
-              );
-            }
+              try {
+                const respData = JSON.parse(jsonrepair(report.report_data));
+
+                const extractCitationsForThisSection = (data) => {
+                  const collectedCitations = [];
+
+                  if (data?.paragraphs) {
+                    data.paragraphs.forEach((paragraph) => {
+                      if (paragraph?.sentences) {
+                        paragraph.sentences.forEach((sentence) => {
+                          if (sentence?.clauses) {
+                            sentence.clauses.forEach((clause) => {
+                              if (clause?.citations && Array.isArray(clause.citations)) {
+                                clause.citations.forEach((citation) => {
+                                  if (typeof citation === "number") {
+                                    collectedCitations.push(citation);
+                                  }
+                                });
+                              }
+                            });
+                          }
+                        });
+                      }
+                    });
+                  }
+                  return [...new Set(collectedCitations)];
+                };
+
+                const sectionCitationIds = extractCitationsForThisSection(respData);
+
+                return (
+                  <div className="narrative-layout-container">
+                    <article className="narrative-text-content">
+                      {respData?.paragraphs?.map((pSection) => (
+                        <div key={pSection.id}>
+                          <h5>{pSection.title}</h5>
+                          {pSection.sentences.map((sentence, idx) => (
+                            <p key={idx}>
+                              {sentence.clauses.map((clause, cIdx) => (
+                                <span key={cIdx}>
+                                  {clause.text}
+                                  {clause.citations
+                                    ?.filter((c) => typeof c === "number")
+                                    .map((citation, citIdx, arr) => (
+                                      <sup key={citIdx}>
+                                        {citation}
+                                        {citIdx < arr.length - 1 ? ", " : ""}
+                                      </sup>
+                                    ))}
+                                  {cIdx < sentence.clauses.length - 1 ? " " : ""}
+                                </span>
+                              ))}
+                            </p>
+                          ))}
+                        </div>
+                      ))}
+                    </article>
+
+                    {sectionCitationIds.length > 0 && (
+                      <div className="narrative-comments-column">
+                        <h5>Referenced Comments</h5>
+                        <CommentList
+                          conversation={conversation}
+                          ptptCount={ptptCount}
+                          math={math}
+                          formatTid={formatTid}
+                          tidsToRender={sectionCitationIds}
+                          comments={comments}
+                          voteColors={voteColors}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              } catch (error) {
+                console.error(
+                  `[${selectedReportSection}] Error processing narrative report section:`,
+                  error,
+                  "Report data was:",
+                  report.report_data
+                );
+                return (
+                  <article style={{ maxWidth: "600px" }}>
+                    <h5>An error occurred while processing this report section.</h5>
+                    <pre>{error.message}</pre>
+                    <p>Problematic data for section {selectedReportSection}:</p>
+                    <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+                      {report.report_data}
+                    </pre>
+                  </article>
+                );
+              }
             } else if (selectedSection.hasTopicData && !selectedSection.hasNarrative) {
               // Show topic metadata when narrative is not yet available
               return (
                 <div className="topic-preview">
                   <h5>Topic Identified - Narrative Pending</h5>
                   <p>This topic has been identified and named by Polis, but the detailed narrative report has not yet been generated.</p>
-                  
+
                   {selectedSection.topicMetadata && (
                     <div className="topic-metadata-display">
                       <h6>Topic Information:</h6>
                       <p><strong>Name:</strong> {selectedSection.topicMetadata.topic_name}</p>
                       <p><strong>Generated by:</strong> {selectedSection.topicMetadata.model_name}</p>
                       <p><strong>Created:</strong> {selectedSection.topicMetadata.created_at}</p>
-                      
+
                       {selectedSection.topicMetadata.sample_comments && selectedSection.topicMetadata.sample_comments.length > 0 && (
                         <div className="sample-comments">
                           <h6>Sample Comments:</h6>
@@ -914,7 +915,7 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
                       )}
                     </div>
                   )}
-                  
+
                   <div className="action-hint">
                     <p>To generate the narrative report, use the &quot;Generate Batch Topics&quot; button above.</p>
                   </div>
@@ -1060,95 +1061,95 @@ const CommentsReport = ({ math, comments, conversation, ptptCount, formatTid, vo
         <h1>Comments Report</h1>
         <div>Report ID: {report_id}</div>
       </div>
-        <div className="report-content">
-          {/* Action buttons at the top */}
-          {showControls && (
-            <div className="section">
-              <h2>Analysis Actions</h2>
-              <div className="action-buttons-grid">
-                <div className="action-button-group">
-                  <h3>Data Processing</h3>
-                  <div className="section-header-actions">
-                    <button className="create-job-button" onClick={() => setConfirmDelphiRunModalVisible(true)}>
-                      Run New Delphi Analysis
-                    </button>
-                  </div>
+      <div className="report-content">
+        {/* Action buttons at the top */}
+        {showControls && (
+          <div className="section">
+            <h2>Analysis Actions</h2>
+            <div className="action-buttons-grid">
+              <div className="action-button-group">
+                <h3>Data Processing</h3>
+                <div className="section-header-actions">
+                  <button className="create-job-button" onClick={() => setConfirmDelphiRunModalVisible(true)}>
+                    Run New Delphi Analysis
+                  </button>
                 </div>
-                
-                <div className="action-button-group">
-                  <h3>Narrative Generation</h3>
-                  <div className="section-header-actions">
-                    <button
-                      className="batch-report-button"
-                      onClick={() => setConfirmDelphiRunModalVisible("batch")}
-                      disabled={batchReportLoading || visualizationJobs.find(job => job.status === "PROCESSING" && job.jobId.includes("batch_report_"))}
-                    >
-                      {batchReportLoading ? "Generating..." : "Generate Batch Topics"}
-                    </button>
+              </div>
+
+              <div className="action-button-group">
+                <h3>Narrative Generation</h3>
+                <div className="section-header-actions">
+                  <button
+                    className="batch-report-button"
+                    onClick={() => setConfirmDelphiRunModalVisible("batch")}
+                    disabled={batchReportLoading || visualizationJobs.find(job => job.status === "PROCESSING" && job.jobId.includes("batch_report_"))}
+                  >
+                    {batchReportLoading ? "Generating..." : "Generate Batch Topics"}
+                  </button>
+                </div>
+                {batchReportResult && (
+                  <div className={`result-message ${batchReportResult.success ? "success" : "error"}`}> {/* eslint-disable-line quotes */}
+                    {batchReportResult.message}
                   </div>
-                  {batchReportResult && (
-                    <div className={`result-message ${batchReportResult.success ? "success" : "error"}`}> {/* eslint-disable-line quotes */}
-                      {batchReportResult.message}
+                )}
+                {
+                  visualizationJobs.find(job => job.status === "PROCESSING" && job.jobId.includes("batch_report_")) && (
+                    <div className="result-message success">
+                      A batch job is currently in progress, please check back later
                     </div>
-                  )}
-                  {
-                    visualizationJobs.find(job => job.status === "PROCESSING" && job.jobId.includes("batch_report_")) && (
-                      <div className="result-message success">
-                        A batch job is currently in progress, please check back later
-                      </div>
-                    )
-                  }
-                </div>
+                  )
+                }
               </div>
             </div>
-          )}
-
-          <div className="section">
-            <h2>Topic Visualizations</h2>
-            <p className="info-text">
-              These visualizations show the spatial relationships between topics and comments.
-              Similar comments are positioned closer together on the map.
-            </p>
-            {renderLayerSwitcher()}
-            {renderVisualizations()}
           </div>
+        )}
 
-          <div className="section">
-            <h2>Narrative Report</h2>
-            <p className="info-text">
-              This narrative report provides insights about group consensus, differences, and key
-              topics in the conversation.
-            </p>
-            {renderNarrativeReports()}
-          </div>
+        <div className="section">
+          <h2>Topic Visualizations</h2>
+          <p className="info-text">
+            These visualizations show the spatial relationships between topics and comments.
+            Similar comments are positioned closer together on the map.
+          </p>
+          {renderLayerSwitcher()}
+          {renderVisualizations()}
+        </div>
 
-          {/* Topics section moved to bottom */}
-          <div className="section">
-            <div className="run-info">
-              <div className="run-header">
-                <h2>
-                  Group Topics{" "}
-                  <span style={{ fontWeight: "normal", fontSize: "0.8em" }}>
-                    generated by {selectedRun?.model_name}
-                  </span>
-                </h2>
-                <p className="generated-date">Generated on {selectedRun?.created_date}</p>
-              </div>
+        <div className="section">
+          <h2>Narrative Report</h2>
+          <p className="info-text">
+            This narrative report provides insights about group consensus, differences, and key
+            topics in the conversation.
+          </p>
+          {renderNarrativeReports()}
+        </div>
 
-              <p className="info-text">
-                These are LLM-generated topic names based on the comments in each group. The
-                algorithm has analyzed the content of comments to extract the main themes.
-              </p>
-
-              {selectedRun?.topics_by_layer && selectedRun.topics_by_layer[selectedLayer] && (
-                <div className="layer-section">
-                  <h2>Group Themes - Layer {selectedLayer}</h2>
-                  {renderTopicCards(selectedLayer)}
-                </div>
-              )}
+        {/* Topics section moved to bottom */}
+        <div className="section">
+          <div className="run-info">
+            <div className="run-header">
+              <h2>
+                Group Topics{" "}
+                <span style={{ fontWeight: "normal", fontSize: "0.8em" }}>
+                  generated by {selectedRun?.model_name}
+                </span>
+              </h2>
+              <p className="generated-date">Generated on {selectedRun?.created_date}</p>
             </div>
+
+            <p className="info-text">
+              These are LLM-generated topic names based on the comments in each group. The
+              algorithm has analyzed the content of comments to extract the main themes.
+            </p>
+
+            {selectedRun?.topics_by_layer && selectedRun.topics_by_layer[selectedLayer] && (
+              <div className="layer-section">
+                <h2>Group Themes - Layer {selectedLayer}</h2>
+                {renderTopicCards(selectedLayer)}
+              </div>
+            )}
           </div>
         </div>
+      </div>
     </div>
   );
 };

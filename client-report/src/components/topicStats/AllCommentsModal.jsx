@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import f from "../../strings/strings";
 import AllCommentsScatterplot from './visualizations/AllCommentsScatterplot.jsx';
 import CommentList from '../lists/commentList.jsx';
 
-const AllCommentsModal = ({ 
-  isOpen, 
-  onClose, 
-  topicName, 
-  topicKey, 
+const AllCommentsModal = ({
+  isOpen,
+  onClose,
+  topicName,
+  topicKey,
   topicStats,
   comments,
   math,
@@ -24,7 +25,7 @@ const AllCommentsModal = ({
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
@@ -34,17 +35,17 @@ const AllCommentsModal = ({
       // Get comments for this topic
       const commentTids = topicStats.comment_tids || [];
       const topicCommentsData = comments.filter(c => commentTids.includes(c.tid));
-      
+
       // Sort by group-aware consensus
       const commentsWithConsensus = topicCommentsData.map(comment => ({
         ...comment,
         groupConsensus: math["group-aware-consensus"]?.[comment.tid] || 0
       }));
-      
-      const sorted = [...commentsWithConsensus].sort((a, b) => 
+
+      const sorted = [...commentsWithConsensus].sort((a, b) =>
         b.groupConsensus - a.groupConsensus
       );
-      
+
       setTopicComments(topicCommentsData);
       setSortedByConsensus(sorted);
     }
@@ -65,7 +66,7 @@ const AllCommentsModal = ({
       justifyContent: 'center',
       zIndex: 1000
     }}
-    onClick={onClose}>
+      onClick={onClose}>
       <div style={{
         backgroundColor: 'white',
         borderRadius: '8px',
@@ -76,7 +77,7 @@ const AllCommentsModal = ({
         flexDirection: 'column',
         overflow: 'hidden'
       }}
-      onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={{
           padding: '20px',
@@ -85,7 +86,7 @@ const AllCommentsModal = ({
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <h2 style={{ margin: 0 }}>{topicName} - Comments Analysis</h2>
+          <h2 style={{ margin: 0 }}>{topicName}{f("all_comments_modal_analysis")}</h2>
           <button
             onClick={onClose}
             style={{
@@ -108,19 +109,19 @@ const AllCommentsModal = ({
         }}>
           {/* Scatterplot */}
           <div>
-            <h3>Comments: Group-Aware Consensus vs. Votes</h3>
+            <h3>{f("all_comments_modal_title")}</h3>
             <p style={{ marginBottom: '20px', color: '#666', fontSize: '14px' }}>
-              Each dot represents a comment. Hover for details.
+              {f("all_comments_modal_desc")}
             </p>
             {topicComments.length > 0 ? (
-              <AllCommentsScatterplot 
-                comments={topicComments} 
-                math={math} 
-                voteColors={voteColors} 
+              <AllCommentsScatterplot
+                comments={topicComments}
+                math={math}
+                voteColors={voteColors}
               />
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                No comments to display
+                {f("all_comments_modal_no_comments")}
               </div>
             )}
           </div>

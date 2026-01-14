@@ -4,6 +4,7 @@ import Heading from "../framework/heading.jsx";
 import Footer from "../framework/Footer.jsx";
 import CommentList from "../lists/commentList.jsx";
 import * as globals from "../globals";
+import f from "../../strings/strings";
 
 const CollectiveStatementsReport = ({ conversation, report_id, math, comments, ptptCount, formatTid, voteColors }) => {
   const [loading, setLoading] = useState(true);
@@ -32,7 +33,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -73,10 +74,10 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
         const response = await net.polisGet("/api/v3/collectiveStatement", {
           report_id: report_id
         });
-        
+
         if (response.status === "success" && response.statements) {
           // Sort by created_at descending (most recent first)
-          const sortedStatements = response.statements.sort((a, b) => 
+          const sortedStatements = response.statements.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
           setStatements(sortedStatements);
@@ -100,13 +101,13 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
         setCardWidth(Math.min(containerWidth * 0.9, 1600)); // 90% of container or max 1600px
-        
+
         // Calculate available height
         const windowHeight = window.innerHeight;
         const containerTop = containerRef.current.getBoundingClientRect().top;
         const footerHeight = 80; // Approximate footer height
         const availableHeight = windowHeight - containerTop - footerHeight - 40; // Less padding needed now
-        
+
         // On mobile (width < 768px), use fixed height. On desktop, use available space
         // Subtract extra space for scale (5% = 50px on a 1000px card)
         const scaleBuffer = 50;
@@ -122,19 +123,19 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
     window.addEventListener('resize', updateCardDimensions);
     return () => window.removeEventListener('resize', updateCardDimensions);
   }, []);
-  
+
   // Recalculate card dimensions when statements are loaded
   useEffect(() => {
     if (statements.length > 0 && containerRef.current) {
       const containerWidth = containerRef.current.offsetWidth;
       setCardWidth(Math.min(containerWidth * 0.9, 1600));
-      
+
       // Recalculate height too
       const windowHeight = window.innerHeight;
       const containerTop = containerRef.current.getBoundingClientRect().top;
       const footerHeight = 80;
       const availableHeight = windowHeight - containerTop - footerHeight - 40;
-      
+
       const scaleBuffer = 50;
       if (window.innerWidth < 768) {
         setCardHeight('600px');
@@ -146,7 +147,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
 
   const scrollToIndex = (index) => {
     if (index === currentIndex) return;
-    
+
     setCurrentIndex(index);
   };
 
@@ -184,7 +185,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
   const renderStatement = (statement, index) => {
     const uniqueCitations = extractCitations(statement.statement_data);
     const isActive = index === currentIndex;
-    
+
     return (
       <div
         key={statement.zid_topic_jobid}
@@ -210,29 +211,29 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
           borderBottom: "1px solid #e0e0e0",
           background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)"
         }}>
-          <h2 style={{ 
-            margin: 0, 
+          <h2 style={{
+            margin: 0,
             fontSize: "1.8em",
             color: "#333",
             marginBottom: "10px"
           }}>
             {statement.topic_name}
           </h2>
-          <p style={{ 
-            margin: 0, 
-            color: "#666", 
+          <p style={{
+            margin: 0,
+            color: "#666",
             fontSize: "0.95em",
-            fontStyle: "italic" 
+            fontStyle: "italic"
           }}>
-            Candidate Collective Statement
+            {f("collective_statement_title")}
           </p>
-          <p style={{ 
-            margin: 0, 
+          <p style={{
+            margin: 0,
             marginTop: "8px",
-            fontSize: "0.85em", 
-            color: "#888" 
+            fontSize: "0.85em",
+            color: "#888"
           }}>
-            Generated {new Date(statement.created_at).toLocaleDateString()} at {new Date(statement.created_at).toLocaleTimeString()}
+            {f("collective_generated")} {new Date(statement.created_at).toLocaleDateString()} {f("collective_at")} {new Date(statement.created_at).toLocaleTimeString()}
             {statement.model && ` • ${statement.model.includes('claude') ? 'Claude Opus 4' : statement.model}`}
           </p>
         </div>
@@ -254,8 +255,8 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
             borderBottom: windowWidth < 992 ? "1px solid #e0e0e0" : "none",
             maxHeight: windowWidth < 992 ? "40%" : "none"
           }}>
-            <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>Statement</h3>
-            {statement.statement_data && statement.statement_data.paragraphs && 
+            <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>{f("collective_statement_label")}</h3>
+            {statement.statement_data && statement.statement_data.paragraphs &&
               statement.statement_data.paragraphs.map((paragraph, idx) => (
                 <div key={idx} style={{ marginBottom: "20px" }}>
                   {paragraph.title && (
@@ -264,8 +265,8 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
                     </h4>
                   )}
                   {paragraph.sentences && paragraph.sentences.map((sentence, sIdx) => (
-                    <p key={sIdx} style={{ 
-                      marginBottom: "10px", 
+                    <p key={sIdx} style={{
+                      marginBottom: "10px",
                       lineHeight: 1.6,
                       color: "#555"
                     }}>
@@ -302,7 +303,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
             minHeight: 0
           }}>
             <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>
-              Cited Comments ({uniqueCitations.length})
+              {f("collective_cited_comments")} ({uniqueCitations.length})
             </h3>
             {uniqueCitations.length > 0 ? (
               <div style={{
@@ -320,7 +321,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
                 />
               </div>
             ) : (
-              <p style={{ color: "#999", fontStyle: "italic" }}>No comments cited</p>
+              <p style={{ color: "#999", fontStyle: "italic" }}>{f("collective_no_comments")}</p>
             )}
           </div>
         </div>
@@ -330,8 +331,8 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
 
   if (loading) {
     return (
-      <div style={{ 
-        maxWidth: "100%", 
+      <div style={{
+        maxWidth: "100%",
         margin: "0 auto",
         backgroundColor: "#f5f6fa",
         minHeight: "100vh"
@@ -341,8 +342,8 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
             <Heading conversation={conversation} />
           </div>
         )}
-        <div style={{ 
-          marginTop: 100, 
+        <div style={{
+          marginTop: 100,
           textAlign: "center",
           padding: "40px"
         }}>
@@ -355,7 +356,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
             borderRadius: "50%",
             animation: "spin 1s linear infinite"
           }}></div>
-          <p style={{ marginTop: "20px", color: "#666" }}>Loading collective statements...</p>
+          <p style={{ marginTop: "20px", color: "#666" }}>{f("collective_loading")}</p>
           <style>{`
             @keyframes spin {
               0% { transform: rotate(0deg); }
@@ -372,7 +373,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
       <div style={{ maxWidth: "100%", margin: "0 auto", padding: "20px" }}>
         {!isEmbedded && <Heading conversation={conversation} />}
         <div style={{ marginTop: 40, textAlign: "center" }}>
-          <p>No collective statements have been generated yet.</p>
+          <p>{f("collective_none")}</p>
         </div>
         {!isEmbedded && <Footer />}
       </div>
@@ -380,8 +381,8 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
   }
 
   return (
-    <div style={{ 
-      maxWidth: "100%", 
+    <div style={{
+      maxWidth: "100%",
       margin: "0 auto",
       backgroundColor: "#f5f6fa",
       minHeight: "100vh"
@@ -391,8 +392,8 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
           <Heading conversation={conversation} />
         </div>
       )}
-      
-      <div style={{ 
+
+      <div style={{
         position: "relative",
         padding: "40px 0",
         overflow: "visible"
@@ -407,7 +408,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
               fontSize: "0.9em",
               marginBottom: "10px"
             }}>
-              {statements.length} statements
+              {statements.length} {f("collective_count_statements")}
             </div>
           </div>
         )}
@@ -421,32 +422,32 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
               fontSize: "0.9em",
               marginBottom: "10px"
             }}>
-              {currentIndex + 1} of {statements.length} statements
+              {currentIndex + 1} {f("collective_of")} {statements.length} {f("collective_count_statements")}
             </div>
-            
+
             {/* Dots Indicator */}
-              <div style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "8px"
-              }}>
-                {statements.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => scrollToIndex(index)}
-                    style={{
-                      width: index === currentIndex ? "24px" : "8px",
-                      height: "8px",
-                      borderRadius: "4px",
-                      border: "none",
-                      backgroundColor: index === currentIndex ? "#007bff" : "#ccc",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      padding: 0
-                    }}
-                  />
-                ))}
-              </div>
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "8px"
+            }}>
+              {statements.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToIndex(index)}
+                  style={{
+                    width: index === currentIndex ? "24px" : "8px",
+                    height: "8px",
+                    borderRadius: "4px",
+                    border: "none",
+                    backgroundColor: index === currentIndex ? "#007bff" : "#ccc",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    padding: 0
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
         {/* Navigation Buttons */}
@@ -510,7 +511,7 @@ const CollectiveStatementsReport = ({ conversation, report_id, math, comments, p
 
 
         {/* Carousel Container */}
-        <div 
+        <div
           ref={containerRef}
           style={{
             overflow: "hidden",

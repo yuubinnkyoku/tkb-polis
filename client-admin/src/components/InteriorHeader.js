@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import { Box } from 'theme-ui'
 import { Link } from 'react-router'
 import Logomark from './framework/Logomark'
+import f from '../strings/strings'
 // import DonationBanner from './conversation-admin/DonationBanner'
 
 const InteriorHeader = ({ children }) => {
@@ -42,7 +43,7 @@ const InteriorHeader = ({ children }) => {
             flexShrink: 0
           }}
           to="/signout">
-          sign out
+          {f('nav_signout')}
         </Link>
       </Box>
       {/* <DonationBanner /> */}

@@ -4,6 +4,7 @@ import CommentList from "../lists/commentList.jsx";
 import TopicDataProvider from "./TopicDataProvider.jsx";
 import TopicSectionsBuilder from "./TopicSectionsBuilder.jsx";
 import TopicSelector from "./TopicSelector.jsx";
+import f from "../../strings/strings";
 
 const TopicReport = ({ report_id, math, comments, conversation, ptptCount, formatTid, voteColors }) => {
   const [selectedTopic, setSelectedTopic] = useState("");
@@ -24,29 +25,29 @@ const TopicReport = ({ report_id, math, comments, conversation, ptptCount, forma
         section: topicKey  // The topic key IS the section (e.g., "layer0_8")
       })
       .then((response) => {
-        
+
         if (response && response.status === "success" && response.reports) {
           // The response contains reports object with the section as key
           const sectionData = response.reports[topicKey] || response.reports[Object.keys(response.reports).map(key => key.includes(topicKey))];
           if (sectionData && sectionData.report_data) {
             // Parse the report_data if it's a string
-            const reportData = typeof sectionData.report_data === 'string' 
-              ? JSON.parse(sectionData.report_data) 
+            const reportData = typeof sectionData.report_data === 'string'
+              ? JSON.parse(sectionData.report_data)
               : sectionData.report_data;
             setTopicContent(reportData);
           } else {
             setTopicContent({
               error: true,
-              message: "No report data found for this topic"
+              message: f("topic_report_no_data")
             });
           }
         } else if (response && response.status === "error") {
           setTopicContent({
             error: true,
-            message: response.message || "No narrative report available for this topic"
+            message: response.message || f("topic_report_no_narrative")
           });
         } else {
-          setTopicContent({ error: true, message: "No narrative report available for this topic" })
+          setTopicContent({ error: true, message: f("topic_report_no_narrative") })
         }
         setContentLoading(false);
       })
@@ -93,7 +94,7 @@ const TopicReport = ({ report_id, math, comments, conversation, ptptCount, forma
         <div className="topic-content">
           <p style={{ color: '#666', fontStyle: 'italic' }}>{topicContent.message}</p>
           <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-            To generate narrative reports, use the "Generate Narrative Report" button in the <a target="_blank" rel="noreferrer" href={`/commentsReport/${report_id}`}>Comments Report page.</a>
+            {f("topic_report_generate_hint")} <a target="_blank" rel="noreferrer" href={`/commentsReport/${report_id}`}>{f("topic_report_comments_report_link")}</a>
           </p>
         </div>
       );
@@ -110,32 +111,32 @@ const TopicReport = ({ report_id, math, comments, conversation, ptptCount, forma
         <div className="topic-text-content">
           <div className="topic-content">
             {topicContent.paragraphs && topicContent.paragraphs.map((paragraph, idx) => (
-            <div key={idx} className="paragraph">
-              <h3>{paragraph.title}</h3>
-              {paragraph.sentences && paragraph.sentences.map((sentence, sIdx) => (
-                <p key={sIdx}>
-                  {sentence.clauses && sentence.clauses.map((clause, cIdx) => (
-                    <span key={cIdx}>
-                      {clause.text}
-                      {clause.citations && clause.citations.length > 0 && (
-                        <sup className="citations">
-                          {clause.citations.join(', ')}
-                        </sup>
-                      )}
-                      {cIdx < sentence.clauses.length - 1 && ' '}
-                    </span>
-                  ))}
-                </p>
-              ))}
-            </div>
-          ))}
+              <div key={idx} className="paragraph">
+                <h3>{paragraph.title}</h3>
+                {paragraph.sentences && paragraph.sentences.map((sentence, sIdx) => (
+                  <p key={sIdx}>
+                    {sentence.clauses && sentence.clauses.map((clause, cIdx) => (
+                      <span key={cIdx}>
+                        {clause.text}
+                        {clause.citations && clause.citations.length > 0 && (
+                          <sup className="citations">
+                            {clause.citations.join(', ')}
+                          </sup>
+                        )}
+                        {cIdx < sentence.clauses.length - 1 && ' '}
+                      </span>
+                    ))}
+                  </p>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
-        
+
         {/* Comments list section - side by side */}
         {citationIds.length > 0 && comments && comments.length > 0 && (
-          <div className="topic-comments-column" style={{ overflowX: "scroll"}}>
-            <h3 style={{ marginBottom: '20px' }}>Comments Referenced in This Topic</h3>
+          <div className="topic-comments-column" style={{ overflowX: "scroll" }}>
+            <h3 style={{ marginBottom: '20px' }}>{f("topic_report_referenced_comments")}</h3>
             <CommentList
               conversation={conversation}
               ptptCount={ptptCount}
@@ -145,7 +146,7 @@ const TopicReport = ({ report_id, math, comments, conversation, ptptCount, forma
               comments={comments}
               voteColors={voteColors || {
                 agree: "#21a53a",
-                disagree: "#e74c3c", 
+                disagree: "#e74c3c",
                 pass: "#b3b3b3"
               }}
               style={{
@@ -173,8 +174,8 @@ const TopicReport = ({ report_id, math, comments, conversation, ptptCount, forma
             }, [defaultSectionKey]);
 
             return (
-            <div className="topic-report-container">
-      <style>{`
+              <div className="topic-report-container">
+                <style>{`
         .topic-report-container {
           padding: 20px;
           font-family: Arial, sans-serif;
@@ -276,25 +277,25 @@ const TopicReport = ({ report_id, math, comments, conversation, ptptCount, forma
           }
         }
       `}</style>
-      
-      {/* Run Information Header */}
-      <div className="run-info-header">
-        <h3>Narrative Summaries</h3>
-      </div>
-      
-      <TopicSelector 
-        sections={sections}
-        selectedTopic={selectedTopic}
-        onTopicChange={handleTopicChange}
-        loading={contentLoading}
-      />
 
-      {contentLoading && (
-        <div className="loading">Loading topic report...</div>
-      )}
+                {/* Run Information Header */}
+                <div className="run-info-header">
+                  <h3>{f("topic_report_narrative_summaries")}</h3>
+                </div>
 
-      {!contentLoading && renderContent()}
-            </div>
+                <TopicSelector
+                  sections={sections}
+                  selectedTopic={selectedTopic}
+                  onTopicChange={handleTopicChange}
+                  loading={contentLoading}
+                />
+
+                {contentLoading && (
+                  <div className="loading">{f("topic_report_loading")}</div>
+                )}
+
+                {!contentLoading && renderContent()}
+              </div>
             );
           }}
         </TopicSectionsBuilder>

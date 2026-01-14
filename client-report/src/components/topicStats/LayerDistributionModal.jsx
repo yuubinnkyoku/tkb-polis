@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import f from "../../strings/strings";
 
-const LayerDistributionModal = ({ 
-  isOpen, 
-  onClose, 
+const LayerDistributionModal = ({
+  isOpen,
+  onClose,
   layerName,
   layerId,
   topics,
@@ -18,37 +19,37 @@ const LayerDistributionModal = ({
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen || !topics || !statsData || !math || !comments) return;
-    
+
     // Use normalized consensus if available, fall back to raw
     const consensusData = math["group-consensus-normalized"] || math["group-aware-consensus"];
     if (!consensusData) return;
 
     // Prepare data for boxplot
     const traces = [];
-    
+
     Object.entries(topics).forEach(([clusterId, topic]) => {
       const stats = statsData[topic.topic_key];
       if (!stats || !stats.comment_tids) return;
-      
+
       // Get group consensus values for comments in this topic
       const consensusValues = [];
       const commentsData = [];
-      
+
       stats.comment_tids.forEach(tid => {
         const consensus = consensusData[tid];
         if (consensus !== undefined) {
           // Find the comment to check vote count
           const comment = comments?.find(c => c.tid === tid);
-          const totalVotes = comment ? 
+          const totalVotes = comment ?
             (comment.agree_count || 0) + (comment.disagree_count || 0) + (comment.pass_count || 0) : 0;
-          
+
           // Only include comments with at least 5 votes for meaningful distribution
           // Comments with very few votes default to 0.333 consensus
           if (totalVotes >= 5) {
@@ -57,7 +58,7 @@ const LayerDistributionModal = ({
           }
         }
       });
-      
+
       if (consensusValues.length > 0) {
         traces.push({
           y: consensusValues,
@@ -74,7 +75,7 @@ const LayerDistributionModal = ({
         });
       }
     });
-    
+
     setPlotData(traces);
   }, [isOpen, topics, statsData, math, comments]);
 
@@ -83,12 +84,12 @@ const LayerDistributionModal = ({
       const layout = {
         title: '',
         yaxis: {
-          title: 'Group-Aware Consensus',
+          title: f("layer_distribution_modal_y_axis"),
           range: [0, 1],
           zeroline: false
         },
         xaxis: {
-          title: 'Topics',
+          title: f("layer_distribution_modal_x_axis"),
           tickangle: -45
         },
         showlegend: false,
@@ -101,12 +102,12 @@ const LayerDistributionModal = ({
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)'
       };
-      
+
       const config = {
         responsive: true,
         displayModeBar: false
       };
-      
+
       window.Plotly.newPlot('layer-distribution-plot', plotData, layout, config);
     }
   }, [plotData]);
@@ -126,7 +127,7 @@ const LayerDistributionModal = ({
       justifyContent: 'center',
       zIndex: 1000
     }}
-    onClick={onClose}>
+      onClick={onClose}>
       <div style={{
         backgroundColor: 'white',
         borderRadius: '8px',
@@ -138,7 +139,7 @@ const LayerDistributionModal = ({
         flexDirection: 'column',
         overflow: 'hidden'
       }}
-      onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={{
           padding: '20px',
@@ -147,7 +148,7 @@ const LayerDistributionModal = ({
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <h2 style={{ margin: 0 }}>{layerName} - Consensus Distribution</h2>
+          <h2 style={{ margin: 0 }}>{layerName}{f("layer_distribution_modal_consensus")}</h2>
           <button
             onClick={onClose}
             style={{
@@ -169,16 +170,14 @@ const LayerDistributionModal = ({
           padding: '20px'
         }}>
           <p style={{ marginBottom: '20px', color: '#666', fontSize: '14px' }}>
-            Box plots showing the distribution of group-aware consensus values for comments with at least 5 votes within each topic. 
-            The box shows the quartiles, the line inside is the median, and outliers are shown as individual points.
-            Comments with fewer than 5 votes are excluded as they default to 0.333 consensus.
+            {f("layer_distribution_modal_desc")}
           </p>
-          
+
           {plotData && plotData.length > 0 ? (
             <div id="layer-distribution-plot" style={{ width: '100%', height: '700px' }}></div>
           ) : (
             <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-              No data to display
+              {f("all_comments_modal_no_comments")}
             </div>
           )}
         </div>

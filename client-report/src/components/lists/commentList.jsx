@@ -2,15 +2,16 @@
 
 import React from "react";
 import * as globals from "../globals";
+import f from "../../strings/strings";
 
 const BarChartCompact = ({ comment, voteCounts, nMembers, voteColors }) => {
   if (!comment) return null;
 
   // Early validation for essential data
   const safeNMembers = typeof nMembers === 'number' && nMembers > 0 ? nMembers : 0;
-  const hasValidVoteCounts = voteCounts && 
-    typeof voteCounts.A === 'number' && 
-    typeof voteCounts.D === 'number' && 
+  const hasValidVoteCounts = voteCounts &&
+    typeof voteCounts.A === 'number' &&
+    typeof voteCounts.D === 'number' &&
     typeof voteCounts.S === 'number';
 
   let w = 100;
@@ -38,7 +39,7 @@ const BarChartCompact = ({ comment, voteCounts, nMembers, voteColors }) => {
         </svg>
         <div>
           <span style={{ fontSize: 12, marginRight: 4, color: "grey" }}>
-            {missingCounts ? "Missing vote counts" : "No votes yet"}
+            {missingCounts ? f("comment_list_missing_votes") : f("comment_list_no_votes")}
           </span>
         </div>
       </div>
@@ -65,44 +66,44 @@ const BarChartCompact = ({ comment, voteCounts, nMembers, voteColors }) => {
     <div
       title={
         agreeString +
-        " Agreed\n" +
+        f("comment_list_agreed") +
         disagreeString +
-        " Disagreed\n" +
+        f("comment_list_disagreed") +
         passString +
-        " Passed\n" +
+        f("comment_list_passed") +
         sawTheComment +
-        " Respondents"
+        f("comment_list_respondents")
       }
     >
       <svg width={101} height={10} style={{ marginRight: 30 }}>
         <g>
           <rect x={0} width={w + 0.5} height={10} fill={"white"} stroke={"rgb(180,180,180)"} />
-          <rect 
-            x={Math.max(0, 0.5 + (agree || 0) + (disagree || 0))} 
-            width={Math.max(0, pass || 0)} 
-            y={0.5} 
-            height={9} 
-            fill={voteColors.pass} 
+          <rect
+            x={Math.max(0, 0.5 + (agree || 0) + (disagree || 0))}
+            width={Math.max(0, pass || 0)}
+            y={0.5}
+            height={9}
+            fill={voteColors.pass}
           />
-          <rect 
-            x={0.5} 
-            width={Math.max(0, agree || 0)} 
-            y={0.5} 
-            height={9} 
-            fill={voteColors.agree} 
+          <rect
+            x={0.5}
+            width={Math.max(0, agree || 0)}
+            y={0.5}
+            height={9}
+            fill={voteColors.agree}
           />
-          <rect 
-            x={Math.max(0, 0.5 + (agree || 0))} 
-            width={Math.max(0, disagree || 0)} 
-            y={0.5} 
-            height={9} 
-            fill={voteColors.disagree} 
+          <rect
+            x={Math.max(0, 0.5 + (agree || 0))}
+            width={Math.max(0, disagree || 0)}
+            y={0.5}
+            height={9}
+            fill={voteColors.disagree}
           />
         </g>
       </svg>
       <div>
         {missingCounts ? (
-          <span style={{ fontSize: 12, marginRight: 4, color: "grey" }}>Missing vote counts</span>
+          <span style={{ fontSize: 12, marginRight: 4, color: "grey" }}>{f("comment_list_missing_votes")}</span>
         ) : (
           <span>
             <span style={{ fontSize: 12, marginRight: 4, color: voteColors.agree }}>
@@ -132,18 +133,18 @@ const CommentRow = ({ comment, groups, voteColors }) => {
   // groups
   Object.entries(safeGroups).forEach(([key, g]) => {
     const i = parseInt(key, 10); // Parse the key to an integer
-    
+
     // Add safety checks for group data
     if (!g || typeof g["n-members"] !== 'number') {
       return; // Skip this group if it's invalid
     }
-    
+
     const nMembers = g["n-members"];
     totalMembers += nMembers;
-    
+
     // Safely access votes data
     const gVotes = g.votes && g.votes[comment.tid] ? g.votes[comment.tid] : undefined;
-  
+
     BarCharts.push(
       <BarChartCompact
         key={i}
@@ -232,7 +233,7 @@ const CommentList = ({ comments, math, ptptCount, tidsToRender, voteColors, styl
             textTransform: "uppercase",
           }}
         >
-          {label || `Group ${key}`}
+          {label || f("comment_list_group_label", { key })}
           <span
             style={{
               marginLeft: 5,
@@ -246,11 +247,11 @@ const CommentList = ({ comments, math, ptptCount, tidsToRender, voteColors, styl
     let labels = [];
 
     // totals
-    labels.push(makeLabel(99, "Overall", safePtptCount));
+    labels.push(makeLabel(99, f("comment_list_overall"), safePtptCount));
 
     Object.entries(safeGroupVotes).forEach(([key, g]) => {
       const i = parseInt(key, 10);
-      const groupLabel = globals.groupLabels && globals.groupLabels[i] ? globals.groupLabels[i] : `Group ${i}`;
+      const groupLabel = globals.groupLabels && globals.groupLabels[i] ? globals.groupLabels[i] : f("comment_list_group_label", { key: i });
       const memberCount = g && typeof g["n-members"] === 'number' ? g["n-members"] : 0;
       labels.push(makeLabel(i, groupLabel, memberCount));
     });
@@ -290,7 +291,7 @@ const CommentList = ({ comments, math, ptptCount, tidsToRender, voteColors, styl
             flexShrink: 0,
           }}
         >
-          Statement
+          {f("comment_list_statement")}
         </span>
 
         {getGroupLabels()}

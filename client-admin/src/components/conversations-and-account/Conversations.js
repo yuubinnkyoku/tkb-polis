@@ -12,6 +12,7 @@ import Conversation from './Conversation'
 import { useLocation, useNavigate } from 'react-router'
 import { isSuperAdmin } from '../../util/auth'
 import Pagination from '../conversation-admin/Pagination'
+import f from '../../strings/strings'
 
 const Conversations = () => {
   const dispatch = useDispatch()
@@ -177,7 +178,7 @@ const Conversations = () => {
             fontWeight: activeView === 'my' ? 'bold' : 'normal',
             textDecoration: activeView === 'my' ? 'underline' : 'none'
           }}>
-          My Conversations
+          {f('my_conversations')}
         </Text>
         <Text
           as="span"
@@ -187,7 +188,7 @@ const Conversations = () => {
             fontWeight: activeView === 'all' ? 'bold' : 'normal',
             textDecoration: activeView === 'all' ? 'underline' : 'none'
           }}>
-          All Conversations
+          {f('all_conversations')}
         </Text>
       </Box>
     )
@@ -200,7 +201,7 @@ const Conversations = () => {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
           <input
             type="text"
-            placeholder="Owner email contains..."
+            placeholder={f('filter_owner_email')}
             value={filters.owner_email}
             onChange={(e) => setFilters((f) => ({ ...f, owner_email: e.target.value }))}
           />
@@ -212,14 +213,14 @@ const Conversations = () => {
                 is_active: e.target.value === '' ? '' : e.target.value === 'true'
               }))
             }>
-            <option value="">All statuses</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
+            <option value="">{f('filter_all_statuses')}</option>
+            <option value="true">{f('filter_active')}</option>
+            <option value="false">{f('filter_inactive')}</option>
           </select>
           <input
             type="number"
             min="0"
-            placeholder="Min comments"
+            placeholder={f('filter_min_comments')}
             value={filters.min_comment_count}
             onChange={(e) => setFilters((f) => ({ ...f, min_comment_count: e.target.value }))}
             style={{ width: 120 }}
@@ -227,7 +228,7 @@ const Conversations = () => {
           <input
             type="number"
             min="0"
-            placeholder="Min participants"
+            placeholder={f('filter_min_participants')}
             value={filters.min_participant_count}
             onChange={(e) => setFilters((f) => ({ ...f, min_participant_count: e.target.value }))}
             style={{ width: 140 }}
@@ -235,7 +236,7 @@ const Conversations = () => {
           <input
             type="number"
             min="0"
-            placeholder="Updated in last N days"
+            placeholder={f('filter_updated_days')}
             value={filters.recently_updated_days}
             onChange={(e) => setFilters((f) => ({ ...f, recently_updated_days: e.target.value }))}
             style={{ width: 200 }}
@@ -243,7 +244,7 @@ const Conversations = () => {
           <input
             type="number"
             min="0"
-            placeholder="Created in last N days"
+            placeholder={f('filter_created_days')}
             value={filters.recently_created_days}
             onChange={(e) => setFilters((f) => ({ ...f, recently_created_days: e.target.value }))}
             style={{ width: 200 }}
@@ -251,23 +252,23 @@ const Conversations = () => {
           <select
             value={sort.sort_by}
             onChange={(e) => setSort((s) => ({ ...s, sort_by: e.target.value }))}>
-            <option value="updated">Sort: Updated</option>
-            <option value="created">Sort: Created</option>
-            <option value="participant_count">Sort: Participants</option>
-            <option value="comment_count">Sort: Comments</option>
+            <option value="updated">{f('sort_updated')}</option>
+            <option value="created">{f('sort_created')}</option>
+            <option value="participant_count">{f('sort_participants')}</option>
+            <option value="comment_count">{f('sort_comments')}</option>
           </select>
           <select
             value={sort.sort_dir}
             onChange={(e) => setSort((s) => ({ ...s, sort_dir: e.target.value }))}>
-            <option value="desc">Desc</option>
-            <option value="asc">Asc</option>
+            <option value="desc">{f('sort_desc')}</option>
+            <option value="asc">{f('sort_asc')}</option>
           </select>
           <Button
             onClick={() => {
               setAllConversations(null)
               loadConversationsIfNeeded()
             }}>
-            Apply
+            {f('filter_apply')}
           </Button>
         </Box>
         {allPagination ? (
@@ -294,7 +295,7 @@ const Conversations = () => {
           lineHeight: 'body',
           mb: [3, null, 4]
         }}>
-        All Conversations
+        {f('all_conversations')}
       </Heading>
       {interstitialVisible && (
         <Box
@@ -425,7 +426,7 @@ const Conversations = () => {
         </Box>
       )}
       <Box sx={{ mb: [3, null, 4] }}>
-        <Button onClick={() => setInterstitialVisible(true)}>Create new conversation</Button>
+        <Button onClick={() => setInterstitialVisible(true)}>{f('create_new_conversation')}</Button>
       </Box>
       {renderSwitcher()}
       {renderAllControls()}
@@ -433,13 +434,13 @@ const Conversations = () => {
         <Box sx={{ mb: [3] }}>
           {activeView === 'all'
             ? allLoading
-              ? 'Loading conversations...'
+              ? f('loading_conversations')
               : null
             : loading
-              ? 'Loading conversations...'
+              ? f('loading_conversations')
               : null}
         </Box>
-        {err ? <Text>{'Error loading conversations'}</Text> : null}
+        {err ? <Text>{f('error_loading_conversations')}</Text> : null}
         {activeView === 'all' && superAdmin ? (
           <Box>
             {/* Headers for desktop table view */}
@@ -453,13 +454,13 @@ const Conversations = () => {
                 borderColor: 'lightGray',
                 fontWeight: 'bold'
               }}>
-              <Text>Topic</Text>
-              <Text sx={{ textAlign: 'right' }}>Participants</Text>
-              <Text sx={{ textAlign: 'right' }}>Comments</Text>
-              <Text sx={{ textAlign: 'right' }}>Updated</Text>
-              <Text sx={{ textAlign: 'right' }}>Created</Text>
-              <Text>Owner Email</Text>
-              <Text sx={{ textAlign: 'center' }}>Active</Text>
+              <Text>{f('table_topic')}</Text>
+              <Text sx={{ textAlign: 'right' }}>{f('table_participants')}</Text>
+              <Text sx={{ textAlign: 'right' }}>{f('table_comments')}</Text>
+              <Text sx={{ textAlign: 'right' }}>{f('table_updated')}</Text>
+              <Text sx={{ textAlign: 'right' }}>{f('table_created')}</Text>
+              <Text>{f('table_owner')}</Text>
+              <Text sx={{ textAlign: 'center' }}>{f('table_active')}</Text>
             </Box>
             {/* Conversation list (cards on mobile, rows on desktop) */}
             {(allConversations || []).map((c) => (

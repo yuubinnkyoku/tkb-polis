@@ -7,6 +7,7 @@ import AllCommentsScatterplot from "../topicStats/visualizations/AllCommentsScat
 import CommentList from "../lists/commentList.jsx";
 import * as globals from "../globals";
 import { canGenerateCollectiveStatement, getTopicConsensusValues } from "../../util/consensusThreshold";
+import f from "../../strings/strings";
 
 const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCount, formatTid, voteColors, onBack, token }) => {
   const [loading, setLoading] = useState(true);
@@ -28,23 +29,23 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
         // Reset collective statement when topic changes
         setCollectiveStatement(null);
         setStatementGenerated(false);
-        
+
         // Fetch topic data from Delphi endpoint
         const topicsResponse = await net.polisGet("/api/v3/delphi", {
           report_id: report_id,
         });
-        
+
         // Fetch topic statistics
         const statsResponse = await net.polisGet("/api/v3/topicStats", {
           report_id: report_id,
         });
-        
+
         if (topicsResponse.status === "success" && statsResponse.status === "success") {
           // Find the topic data
           const latestRunKey = Object.keys(topicsResponse.runs).sort().reverse()[0];
           const latestRun = topicsResponse.runs[latestRunKey];
           let foundTopic = null;
-          
+
           Object.entries(latestRun.topics_by_layer || {}).forEach(([layerId, topics]) => {
             Object.entries(topics).forEach(([clusterId, topic]) => {
               if (topic.topic_key === topic_key) {
@@ -52,32 +53,32 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               }
             });
           });
-          
+
           if (foundTopic && statsResponse.stats[topic_key]) {
             setTopicData(foundTopic);
-            
+
             // Calculate metrics client-side
             const stats = statsResponse.stats[topic_key];
             const commentTids = stats.comment_tids || [];
             const topicCommentsData = comments.filter(c => commentTids.includes(c.tid));
-            
+
             // Calculate metrics
             let totalVotes = 0;
             let totalAgree = 0;
             let totalDisagree = 0;
             let totalPass = 0;
-            
+
             topicCommentsData.forEach(comment => {
               const agreeCount = comment.agree_count || 0;
               const disagreeCount = comment.disagree_count || 0;
               const passCount = comment.pass_count || 0;
-              
+
               totalVotes += agreeCount + disagreeCount + passCount;
               totalAgree += agreeCount;
               totalDisagree += disagreeCount;
               totalPass += passCount;
             });
-            
+
             const enrichedStats = {
               ...stats,
               comment_count: commentTids.length,
@@ -87,10 +88,10 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               pass_votes: totalPass,
               vote_density: commentTids.length > 0 ? totalVotes / commentTids.length : 0
             };
-            
+
             setTopicStats(enrichedStats);
             setTopicComments(topicCommentsData);
-            
+
             // Sort by group consensus
             const consensusData = math?.["group-consensus-normalized"] || math?.["group-aware-consensus"];
             if (consensusData) {
@@ -104,7 +105,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             }
           }
         }
-        
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching topic data:", err);
@@ -122,19 +123,19 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
       const response = await net.polisGet("/api/v3/collectiveStatement", {
         report_id: report_id
       });
-      
+
       if (response.status === "success" && response.statements && response.statements.length > 0) {
         // Find statements for this topic
-        const topicStatements = response.statements.filter(stmt => 
+        const topicStatements = response.statements.filter(stmt =>
           stmt.topic_key === topic_key
         );
-        
+
         if (topicStatements.length > 0) {
           // Use the most recent statement
-          const mostRecent = topicStatements.sort((a, b) => 
+          const mostRecent = topicStatements.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           )[0];
-          
+
           return mostRecent;
         }
       }
@@ -147,13 +148,13 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
 
   const generateCollectiveStatement = async () => {
     if (loadingStatement || statementGenerated) return;
-    
+
     try {
       setLoadingStatement(true);
-      
+
       // First check if we have an existing statement
       const existingStatement = await checkExistingStatements();
-      
+
       if (existingStatement) {
         console.log("Using existing collective statement from", existingStatement.created_at);
         setCollectiveStatement(existingStatement.statement_data);
@@ -165,10 +166,10 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
         setLoadingStatement(false);
         return;
       }
-      
+
       // Check if this topic can generate a collective statement
       const statementCheck = canGenerateCollectiveStatement(topicStats.comment_tids, math);
-      
+
       if (!statementCheck.canGenerate) {
         console.log(`Skipping collective statement generation: ${statementCheck.message}`);
         setLoadingStatement(false);
@@ -178,10 +179,10 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
         });
         return;
       }
-      
+
       // Get only the qualifying comment IDs
       const qualifyingTids = statementCheck.details.map(comment => comment.tid);
-      
+
       // Get the consensus values only for qualifying comments
       const relevantConsensus = {};
       const consensusData = math["group-consensus-normalized"] || math["group-aware-consensus"];
@@ -190,7 +191,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
           relevantConsensus[tid] = consensusData[tid];
         }
       });
-      
+
       console.log("Generating collective statement with:", {
         report_id: report_id,
         topic_key: topic_key,
@@ -198,7 +199,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
         qualifyingCount: qualifyingTids.length,
         qualifyingTids: qualifyingTids
       });
-      
+
       const response = await net.polisPost("/api/v3/collectiveStatement", {
         report_id: report_id,
         topic_key: topic_key,
@@ -206,9 +207,9 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
         group_consensus: relevantConsensus,
         qualifying_tids: qualifyingTids  // Send the list of qualifying comment IDs
       }, token);
-      
+
       console.log("Collective statement response:", response);
-      
+
       if (response.status === "success" && response.statementData) {
         setCollectiveStatement(response.statementData);
         setStatementGenerated(true);
@@ -221,17 +222,17 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
         setStatementGenerated(true);
       } else {
         console.error("Unexpected response format:", response);
-        setCollectiveStatement({ 
-          error: true, 
-          message: "Received unexpected response format" 
+        setCollectiveStatement({
+          error: true,
+          message: "Received unexpected response format"
         });
       }
     } catch (err) {
       console.error("Error generating collective statement:", err);
       // Show user-friendly error message
-      setCollectiveStatement({ 
-        error: true, 
-        message: "Unable to generate candidate collective statement. Please try again later." 
+      setCollectiveStatement({
+        error: true,
+        message: "Unable to generate candidate collective statement. Please try again later."
       });
     } finally {
       setLoadingStatement(false);
@@ -241,19 +242,19 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
   // Fetch narrative report if it exists
   const fetchNarrativeReport = async () => {
     if (!topic_key || narrativeLoading) return;
-    
+
     try {
       setNarrativeLoading(true);
       const response = await net.polisGet("/api/v3/delphi/reports", {
         report_id: report_id,
         section: topic_key
       });
-      
+
       if (response && response.status === "success" && response.reports) {
         const sectionData = response.reports[topic_key];
         if (sectionData && sectionData.report_data) {
-          const reportData = typeof sectionData.report_data === 'string' 
-            ? JSON.parse(sectionData.report_data) 
+          const reportData = typeof sectionData.report_data === 'string'
+            ? JSON.parse(sectionData.report_data)
             : sectionData.report_data;
           setTopicNarrative(reportData);
         }
@@ -283,7 +284,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "20px" }}>
         <Heading conversation={conversation} />
         <div style={{ marginTop: 40, textAlign: "center" }}>
-          <p>Loading topic data...</p>
+          <p>{f("topic_page_loading")}</p>
         </div>
       </div>
     );
@@ -294,9 +295,9 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "20px" }}>
         <Heading conversation={conversation} />
         <div style={{ marginTop: 40, textAlign: "center" }}>
-          <p>Topic not found</p>
+          <p>{f("topic_page_not_found")}</p>
           <button onClick={onBack} style={{ marginTop: 20 }}>
-            Go Back
+            {f("topic_page_go_back")}
           </button>
         </div>
       </div>
@@ -306,9 +307,9 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
   return (
     <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "20px" }}>
       <Heading conversation={conversation} />
-      
+
       <div style={{ marginTop: 40 }}>
-        <button 
+        <button
           onClick={() => window.location.href = `/topicStats/${report_id}`}
           style={{
             background: "none",
@@ -319,96 +320,96 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             color: "#0066cc"
           }}
         >
-          ← Back to Topics
+          {f("topic_page_back_to_topics")}
         </button>
-        
+
         <p style={globals.primaryHeading}>{topicData.topic_name}</p>
-        
+
         {/* Key Statistics */}
-        <section style={{ 
-          maxWidth: 1200, 
+        <section style={{
+          maxWidth: 1200,
           marginTop: 30,
           marginBottom: 40
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: "2rem" }}>
-            <div style={{ flex: 1, minWidth: "200px", textAlign: "center"}}>
-              <p style={{ 
-                fontSize: "13px", 
-                textTransform: "uppercase", 
-                letterSpacing: "1px", 
+            <div style={{ flex: 1, minWidth: "200px", textAlign: "center" }}>
+              <p style={{
+                fontSize: "13px",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
                 color: "#666",
                 marginBottom: "8px"
-              }}>Comments</p>
-              <p style={{ 
-                fontFamily: "Georgia, serif", 
-                fontSize: "3rem", 
+              }}> {f("comments")}</p>
+              <p style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "3rem",
                 margin: 0,
                 fontWeight: "normal"
               }}>{topicStats.comment_count}</p>
             </div>
-            <div style={{ flex: 1, minWidth: "200px", textAlign: "center"}}>
-              <p style={{ 
-                fontSize: "13px", 
-                textTransform: "uppercase", 
-                letterSpacing: "1px", 
+            <div style={{ flex: 1, minWidth: "200px", textAlign: "center" }}>
+              <p style={{
+                fontSize: "13px",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
                 color: "#666",
                 marginBottom: "8px"
-              }}>Total Votes</p>
-              <p style={{ 
-                fontFamily: "Georgia, serif", 
-                fontSize: "3rem", 
+              }}>{f("votes")}</p>
+              <p style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "3rem",
                 margin: 0,
                 fontWeight: "normal"
               }}>{topicStats.total_votes.toLocaleString()}</p>
             </div>
-            <div style={{ flex: 1, minWidth: "200px", textAlign: "center"}}>
-              <p style={{ 
-                fontSize: "13px", 
-                textTransform: "uppercase", 
-                letterSpacing: "1px", 
+            <div style={{ flex: 1, minWidth: "200px", textAlign: "center" }}>
+              <p style={{
+                fontSize: "13px",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
                 color: "#666",
                 marginBottom: "8px"
-              }}>Total Agree Votes</p>
-              <p style={{ 
-                fontFamily: "Georgia, serif", 
-                fontSize: "3rem", 
-                margin: 0, 
+              }}>{f("topic_page_total_agree_votes")}</p>
+              <p style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "3rem",
+                margin: 0,
                 color: voteColors?.agree || globals.brandColors.agree,
                 fontWeight: "normal"
               }}>
                 {topicStats.total_votes > 0 ? Math.round((topicStats.agree_votes / topicStats.total_votes) * 100) : 0}%
               </p>
               <p style={{ fontSize: "13px", color: "#999", marginTop: "5px" }}>
-                {topicStats.agree_votes.toLocaleString()} votes
+                {f("topic_page_votes_count", { count: topicStats.agree_votes.toLocaleString() })}
               </p>
             </div>
-            <div style={{ flex: 1, minWidth: "200px", textAlign: "center"}}>
-              <p style={{ 
-                fontSize: "13px", 
-                textTransform: "uppercase", 
-                letterSpacing: "1px", 
+            <div style={{ flex: 1, minWidth: "200px", textAlign: "center" }}>
+              <p style={{
+                fontSize: "13px",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
                 color: "#666",
                 marginBottom: "8px"
-              }}>Total Disagree Votes</p>
-              <p style={{ 
-                fontFamily: "Georgia, serif", 
-                fontSize: "3rem", 
-                margin: 0, 
+              }}>{f("topic_page_total_disagree_votes")}</p>
+              <p style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "3rem",
+                margin: 0,
                 color: voteColors?.disagree || globals.brandColors.disagree,
                 fontWeight: "normal"
               }}>
                 {topicStats.total_votes > 0 ? Math.round((topicStats.disagree_votes / topicStats.total_votes) * 100) : 0}%
               </p>
               <p style={{ fontSize: "13px", color: "#999", marginTop: "5px" }}>
-                {topicStats.disagree_votes.toLocaleString()} votes
+                {f("topic_page_votes_count", { count: topicStats.disagree_votes.toLocaleString() })}
               </p>
             </div>
           </div>
         </section>
-        
+
         {/* Comment Divisiveness Distribution - moved to top */}
-        <div style={{ 
-          marginTop: 40, 
+        <div style={{
+          marginTop: 40,
           marginBottom: 60,
           borderTop: "1px solid #e0e0e0",
           paddingTop: 40
@@ -419,7 +420,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             fontSize: "18px",
             letterSpacing: "0.5px",
             textTransform: "uppercase"
-          }}>Comment Divisiveness Distribution</p>
+          }}>{f("topic_page_divisiveness_title")}</p>
           <p style={{
             ...globals.paragraph,
             fontSize: "14px",
@@ -427,7 +428,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             color: "#666",
             marginBottom: 30
           }}>
-            Each circle represents a comment. Position shows how similarly groups voted. Hover to see the group vote breakdown.
+            {f("topic_page_divisiveness_desc")}
           </p>
           <TopicBeeswarm
             comments={comments}
@@ -439,10 +440,10 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             voteColors={voteColors}
           />
         </div>
-        
+
         {/* Collective Statement - moved to top and auto-generated */}
-        <div style={{ 
-          marginTop: 40, 
+        <div style={{
+          marginTop: 40,
           marginBottom: 60,
           borderTop: "1px solid #e0e0e0",
           paddingTop: 40
@@ -453,7 +454,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             fontSize: "18px",
             letterSpacing: "0.5px",
             textTransform: "uppercase"
-          }}>Candidate Collective Statement</p>
+          }}>{f("collective_statement_title")}</p>
           <p style={{
             ...globals.paragraph,
             fontSize: "14px",
@@ -462,28 +463,28 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             marginBottom: 20,
             fontStyle: "italic"
           }}>
-            Based on voting trends thus far
+            {f("collective_statement_modal_trends")}
             {statementMetadata && (
               <span style={{ marginLeft: "10px", fontSize: "13px", color: "#888", fontStyle: "normal" }}>
-                • Generated {new Date(statementMetadata.created_at).toLocaleDateString()} at {new Date(statementMetadata.created_at).toLocaleTimeString()} 
+                • {f("collective_generated")} {new Date(statementMetadata.created_at).toLocaleDateString()} {f("collective_at")} {new Date(statementMetadata.created_at).toLocaleTimeString()}
                 {statementMetadata.model && ` (${statementMetadata.model.includes('claude') ? 'Claude Opus 4' : statementMetadata.model})`}
               </span>
             )}
           </p>
-          
+
           {loadingStatement && (
-            <div style={{ 
+            <div style={{
               padding: "20px",
               backgroundColor: "#f5f5f5",
               border: "1px solid #e0e0e0",
               borderRadius: "8px"
             }}>
-              <p style={{ color: "#666", fontStyle: "italic", margin: 0 }}>Generating candidate collective statement...</p>
+              <p style={{ color: "#666", fontStyle: "italic", margin: 0 }}>{f("collective_statement_modal_generating")}</p>
             </div>
           )}
-          
+
           {collectiveStatement && collectiveStatement.insufficient && (
-            <div style={{ 
+            <div style={{
               padding: "20px",
               backgroundColor: "#fff3cd",
               border: "1px solid #ffeaa7",
@@ -491,14 +492,14 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               marginTop: 20
             }}>
               <p style={{ color: "#856404", margin: 0 }}>
-                <strong>Insufficient consensus:</strong> {collectiveStatement.message}
+                <strong>{f("topic_page_insufficient_consensus")}</strong> {collectiveStatement.message}
               </p>
               <p style={{ color: "#856404", margin: "10px 0 0 0", fontSize: "14px" }}>
-                Candidate collective statements require topics with strong cross-group agreement to ensure meaningful representation.
+                {f("topic_page_insufficient_consensus_desc")}
               </p>
             </div>
           )}
-          
+
           {collectiveStatement && !collectiveStatement.error && !collectiveStatement.insufficient && (() => {
             // Extract all citations from the collective statement
             const citationIds = [];
@@ -513,23 +514,23 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               });
             });
             const uniqueCitations = [...new Set(citationIds)];
-            
+
             return (
-              <div style={{ 
-                display: "flex", 
-                flexDirection: window.innerWidth > 992 ? "row" : "column", 
+              <div style={{
+                display: "flex",
+                flexDirection: window.innerWidth > 992 ? "row" : "column",
                 gap: "20px",
                 marginTop: 20
               }}>
                 {/* Collective statement text content */}
-                <div style={{ 
+                <div style={{
                   flexGrow: 0,
                   flexShrink: 1,
                   flexBasis: window.innerWidth > 992 ? "520px" : "auto",
                   minWidth: window.innerWidth > 992 ? "400px" : "auto",
                   width: window.innerWidth > 992 ? "auto" : "100%"
                 }}>
-                  <div style={{ 
+                  <div style={{
                     background: "#f5f5f5",
                     padding: "20px",
                     borderRadius: "8px",
@@ -545,7 +546,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
                               <span key={cIdx}>
                                 {clause.text}
                                 {clause.citations && clause.citations.length > 0 && (
-                                  <sup style={{ 
+                                  <sup style={{
                                     color: "#0066cc",
                                     fontSize: "0.85em",
                                     marginLeft: "2px"
@@ -562,10 +563,10 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Comments referenced in collective statement */}
                 {uniqueCitations.length > 0 && (
-                  <div style={{ 
+                  <div style={{
                     flexGrow: 1,
                     flexShrink: 1,
                     flexBasis: window.innerWidth > 992 ? "0%" : "auto",
@@ -574,7 +575,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
                     overflowX: "auto",
                     marginTop: window.innerWidth > 992 ? 0 : 30
                   }}>
-                    <h3 style={{ marginBottom: 20 }}>Comments Referenced</h3>
+                    <h3 style={{ marginBottom: 20 }}>{f("topic_page_comments_referenced")}</h3>
                     <div style={{ width: "max-content" }}>
                       <CommentList
                         conversation={conversation}
@@ -591,9 +592,9 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               </div>
             );
           })()}
-          
+
           {collectiveStatement && collectiveStatement.error && (
-            <div style={{ 
+            <div style={{
               padding: "20px",
               backgroundColor: "#f5f5f5",
               border: "1px solid #e0e0e0",
@@ -602,16 +603,16 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               <p style={{ color: "#666", fontStyle: "italic", margin: 0 }}>{collectiveStatement.message}</p>
             </div>
           )}
-          
+
           {!collectiveStatement && !loadingStatement && (
-            <div style={{ 
+            <div style={{
               padding: "20px",
               backgroundColor: "#f5f5f5",
               border: "1px solid #e0e0e0",
               borderRadius: "8px"
             }}>
               <p style={{ color: "#666", fontStyle: "italic", margin: 0 }}>
-                Unable to generate candidate collective statement. Please try refreshing the page.
+                {f("topic_page_narrative_err_refresh")}
               </p>
             </div>
           )}
@@ -620,7 +621,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
 
       {/* Narrative Report Section */}
       {topicNarrative && topicNarrative.paragraphs && (
-        <div style={{ 
+        <div style={{
           marginTop: 40,
           borderTop: "1px solid #e0e0e0",
           paddingTop: 40
@@ -631,8 +632,8 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             fontSize: "18px",
             letterSpacing: "0.5px",
             textTransform: "uppercase"
-          }}>Narrative Summary</p>
-          
+          }}>{f("topic_page_narrative_summary")}</p>
+
           {/* Extract all citations from the narrative */}
           {(() => {
             const citationIds = [];
@@ -646,24 +647,24 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
               });
             });
             const uniqueCitations = [...new Set(citationIds)];
-            
+
             return (
-              <div style={{ 
-                display: "flex", 
-                flexDirection: window.innerWidth > 992 ? "row" : "column", 
+              <div style={{
+                display: "flex",
+                flexDirection: window.innerWidth > 992 ? "row" : "column",
                 gap: "20px",
                 marginTop: 30,
                 marginBottom: 40
               }}>
                 {/* Narrative text content */}
-                <div style={{ 
+                <div style={{
                   flexGrow: 0,
                   flexShrink: 1,
                   flexBasis: window.innerWidth > 992 ? "520px" : "auto",
                   minWidth: window.innerWidth > 992 ? "400px" : "auto",
                   width: window.innerWidth > 992 ? "auto" : "100%"
                 }}>
-                  <div style={{ 
+                  <div style={{
                     background: "#f9f9f9",
                     padding: "20px",
                     borderRadius: "8px",
@@ -678,7 +679,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
                               <span key={cIdx}>
                                 {clause.text}
                                 {clause.citations && clause.citations.length > 0 && (
-                                  <sup style={{ 
+                                  <sup style={{
                                     color: "#0066cc",
                                     fontSize: "0.85em",
                                     marginLeft: "2px"
@@ -695,10 +696,10 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Comments referenced in narrative */}
                 {uniqueCitations.length > 0 && (
-                  <div style={{ 
+                  <div style={{
                     flexGrow: 1,
                     flexShrink: 1,
                     flexBasis: window.innerWidth > 992 ? "0%" : "auto",
@@ -707,7 +708,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
                     overflowX: "auto",
                     marginTop: window.innerWidth > 992 ? 0 : 30
                   }}>
-                    <h3 style={{ marginBottom: 20 }}>Comments Referenced</h3>
+                    <h3 style={{ marginBottom: 20 }}>{f("topic_page_comments_referenced")}</h3>
                     <div style={{ width: "max-content" }}>
                       <CommentList
                         conversation={conversation}
@@ -729,7 +730,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
 
 
       {/* Consensus vs Engagement Section */}
-      <div style={{ 
+      <div style={{
         marginTop: 40,
         borderTop: "1px solid #e0e0e0",
         paddingTop: 40
@@ -740,7 +741,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
           fontSize: "18px",
           letterSpacing: "0.5px",
           textTransform: "uppercase"
-        }}>Consensus vs Engagement</p>
+        }}>{f("topic_page_consensus_vs_engagement")}</p>
         <p style={{
           ...globals.paragraph,
           fontSize: "14px",
@@ -748,8 +749,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
           color: "#666",
           marginBottom: 30
         }}>
-          This visualization shows how group consensus relates to voting engagement for each comment.
-          Comments with high consensus and high engagement represent areas of strong agreement or disagreement across the conversation.
+          {f("topic_page_consensus_vs_engagement_desc")}
         </p>
         <div style={{ marginTop: 30, marginBottom: 40 }}>
           {topicComments.length > 0 && math && math["group-aware-consensus"] && topicStats ? (
@@ -760,7 +760,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
             />
           ) : (
             <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
-              No data available for visualization
+              {f("nothing_to_show")}
             </div>
           )}
         </div>
@@ -768,7 +768,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
 
 
       {/* All Comments Section */}
-      <div style={{ 
+      <div style={{
         marginTop: 40,
         borderTop: "1px solid #e0e0e0",
         paddingTop: 40,
@@ -780,7 +780,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
           fontSize: "18px",
           letterSpacing: "0.5px",
           textTransform: "uppercase"
-        }}>All Comments ({topicComments.length})</p>
+        }}>{f("topic_page_all_comments_n", { count: topicComments.length })}</p>
         <p style={{
           ...globals.paragraph,
           fontSize: "14px",
@@ -788,7 +788,7 @@ const TopicPage = ({ conversation, report_id, topic_key, math, comments, ptptCou
           color: "#666",
           marginBottom: 30
         }}>
-          All comments in this topic.
+          {f("topic_page_all_comments_this_topic")}
         </p>
         <div style={{ marginTop: 30 }}>
           <CommentList

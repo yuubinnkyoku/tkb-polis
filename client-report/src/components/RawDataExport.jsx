@@ -1,5 +1,6 @@
 import React from "react";
 import * as globals from "./globals";
+import f from "../strings/strings";
 
 const getCurrentTimestamp = () => {
   const now = new Date();
@@ -31,14 +32,14 @@ const RawDataExport = ({ conversation, report_id }) => {
       }}
     >
       <p style={{ wordBreak: "break-all", fontFamily: "monospace", fontSize: globals.fontSizes.medium }}>
-        <strong>Raw Data Export (Anonymous)</strong>
+        <strong>{f("export_title")}</strong>
       </p>
       <p style={{ wordBreak: "break-all", fontFamily: "monospace", fontStyle: "italic" }}>
-        {`The following data exports are anonymized. Participants are identifed by an integer representing the order in which they first voted. For a full description of files and columns, please see: `}
+        {f("export_description")}
         <a href="https://compdemocracy.org/export/"> https://compdemocracy.org/export/ </a>
       </p>
       <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-        {`----------Summary: `}
+        {f("export_summary")}
         <a
           download={getDownloadFilename("summary", conversation)}
           href={`//${window.location.hostname}/api/v3/reportExport/${report_id}/summary.csv`}
@@ -48,7 +49,7 @@ const RawDataExport = ({ conversation, report_id }) => {
         </a>
       </p>
       <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-        {`---------Comments: `}
+        {f("export_comments")}
         <a
           download={getDownloadFilename("comments", conversation)}
           href={`//${window.location.hostname}/api/v3/reportExport/${report_id}/comments.csv`}
@@ -56,10 +57,10 @@ const RawDataExport = ({ conversation, report_id }) => {
         >
           {getDownloadFilename("comments", conversation)}
         </a>
-        {` (may take up to several minutes)`}
+        {f("export_may_take_minutes")}
       </p>
       <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-        {`----Votes history: `}
+        {f("export_votes_history")}
         <a
           download={getDownloadFilename("votes", conversation)}
           href={`//${window.location.hostname}/api/v3/reportExport/${report_id}/votes.csv`}
@@ -67,10 +68,10 @@ const RawDataExport = ({ conversation, report_id }) => {
         >
           {getDownloadFilename("votes", conversation)}
         </a>
-        {` (as event log)`}
+        {f("export_as_event_log")}
       </p>
       <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-        {`-----Votes matrix: `}
+        {f("export_votes_matrix")}
         <a
           download={getDownloadFilename("participant-votes", conversation)}
           href={`//${window.location.hostname}/api/v3/reportExport/${report_id}/participant-votes.csv`}
@@ -78,11 +79,11 @@ const RawDataExport = ({ conversation, report_id }) => {
         >
           {getDownloadFilename("participant-votes", conversation)}
         </a>
-        {` (as comments x participants matrix)`}
+        {f("export_as_matrix")}
       </p>
       {conversation.importance_enabled && (
         <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-          {`Importance matrix: `}
+          {f("export_importance_matrix")}
           <a
             download={getDownloadFilename("participant-importance", conversation)}
             href={`//${window.location.hostname}/api/v3/reportExport/${report_id}/participant-importance.csv`}
@@ -90,11 +91,11 @@ const RawDataExport = ({ conversation, report_id }) => {
           >
             {getDownloadFilename("participant-importance", conversation)}
           </a>
-          {` (as comments x participants matrix)`}
+          {f("export_as_matrix")}
         </p>
       )}
       <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-        {`---Comment groups: `}
+        {f("export_comment_groups")}
         <a
           download={getDownloadFilename("comment-groups", conversation)}
           href={`//${window.location.hostname}/api/v3/reportExport/${report_id}/comment-groups.csv`}
@@ -106,7 +107,7 @@ const RawDataExport = ({ conversation, report_id }) => {
 
       <div style={{ marginTop: "3em" }}>
         <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-          <strong>Public API endpoints (read only, Jupyter notebook friendly)</strong>
+          <strong>{f("export_public_api")}</strong>
         </p>
         <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
           {`$ curl ${window.location.protocol}//${window.location.hostname}/api/v3/reportExport/${report_id}/summary.csv`}
@@ -133,22 +134,19 @@ const RawDataExport = ({ conversation, report_id }) => {
       {doShowDataLicenseTerms && (
         <div style={{ marginTop: "3em" }}>
           <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-            <strong>Attribution of Polis Data</strong>
+            <strong>{f("export_attribution_title")}</strong>
           </p>
           <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-            All Polis data is licensed under a Creative Commons Attribution 4.0 International
-            license: https://creativecommons.org/licenses/by/4.0/
+            {f("export_attribution_license")}
+            https://creativecommons.org/licenses/by/4.0/
           </p>
-          <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>--------------- BEGIN STATEMENT ---------------</p>
+          <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>{f("export_statement_begin")}</p>
           <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-            {`Data was gathered using the Polis software (see: compdemocracy.org/polis and github.com/compdemocracy/polis) and is sub-licensed
-          under CC BY 4.0 with Attribution to The Computational Democracy Project. The data and more
-          information about how the data was collected can be found at the following link: ${window.location.href}`}
+            {f("export_attribution_description") + window.location.href}
           </p>
-          <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>--------------- END STATEMENT---------------</p>
+          <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>{f("export_statement_end")}</p>
           <p style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
-            For further information on best practices for Attribution of CC 4.0 licensed content
-            Please see:
+            {f("export_attribution_best_practices")}
             https://wiki.creativecommons.org/wiki/Best_practices_for_attribution#Title.2C_Author.2C_Source.2C_License
           </p>
         </div>

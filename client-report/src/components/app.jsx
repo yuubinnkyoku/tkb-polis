@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "react-oidc-context";
 
 import * as globals from "./globals.js";
+import f from "../strings/strings";
 import URLs from "../util/url.js";
 import DataUtils from "../util/dataUtils.js";
 import Heading from "./framework/heading.jsx";
@@ -69,10 +70,10 @@ const computeVoteTotal = (users) => {
 
 const App = (props) => {
   const auth = useAuth();
-  
+
   // Add token state to manage auth throughout the component
   const [token, setToken] = useState(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [consensus, setConsensus] = useState(null);
   const [math, setMath] = useState(null);
@@ -87,7 +88,7 @@ const App = (props) => {
   const [isStatsOnly, setIsStatsOnly] = useState(
     window.location.pathname.split("/")[1] === "stats"
   );
-  
+
   const [isCommentsReport, setIsCommentsReport] = useState(
     window.location.pathname.split("/")[1] === "commentsReport"
   );
@@ -155,7 +156,7 @@ const App = (props) => {
         setToken(null);
       }
     };
-    
+
     getToken();
   }, [auth.isAuthenticated, auth.isLoading, auth.user]);
 
@@ -259,10 +260,8 @@ const App = (props) => {
     const urlPrefix = URLs.urlPrefix;
     try {
       const response = await fetch(
-        `${urlPrefix}api/v3/reportNarrative?report_id=${report_id}${
-          searchParamsSection ? `&section=${searchParamsSection}` : ``
-        }${searchParamsModel ? `&model=${searchParamsModel}` : ``}${
-          searchParamsCache ? `&noCache=${searchParamsCache}` : ``
+        `${urlPrefix}api/v3/reportNarrative?report_id=${report_id}${searchParamsSection ? `&section=${searchParamsSection}` : ``
+        }${searchParamsModel ? `&model=${searchParamsModel}` : ``}${searchParamsCache ? `&noCache=${searchParamsCache}` : ``
         }`,
         {
           credentials: "include",
@@ -270,7 +269,7 @@ const App = (props) => {
           headers: {
             Accept: "application/json, text/plain, */*",
             "Content-Type": "application/json",
-            ...(authToken && {"Authorization": `Bearer ${authToken}`})
+            ...(authToken && { "Authorization": `Bearer ${authToken}` })
           },
         }
       );
@@ -394,9 +393,9 @@ const App = (props) => {
     });
     const matrixPromise = globals.enableMatrix
       ? mathPromise.then((math) => {
-          const math_tick = math.math_tick;
-          return getCorrelationMatrix(math_tick, authToken);
-        })
+        const math_tick = math.math_tick;
+        return getCorrelationMatrix(math_tick, authToken);
+      })
       : Promise.resolve();
     const conversationPromise = reportPromise.then((report) => {
       return getConversation(report.conversation_id, authToken);
@@ -555,8 +554,8 @@ const App = (props) => {
         var voteTotals = DataUtils.getVoteTotals(mathResult);
         _comments = _comments.map((c) => {
           // Use normalized consensus if available, fall back to raw
-          c["group-aware-consensus"] = mathResult["group-consensus-normalized"] ? 
-            mathResult["group-consensus-normalized"][c.tid] : 
+          c["group-aware-consensus"] = mathResult["group-consensus-normalized"] ?
+            mathResult["group-consensus-normalized"][c.tid] :
             mathResult["group-aware-consensus"][c.tid];
           uniqueCommenters[c.pid] = 1;
           c = Object.assign(c, voteTotals[c.tid]);
@@ -608,12 +607,12 @@ const App = (props) => {
   };
 
   useEffect(() => {
-    const init = async () => {      
+    const init = async () => {
       if (!report_id) {
         console.error("No report_id found - API calls will not be made");
         return;
       }
-      
+
       await getData(token);
 
       // Call to the Delphi endpoint to get LLM-generated topic names
@@ -720,7 +719,7 @@ const App = (props) => {
   if (hasError) {
     return (
       <div data-testid="reports-overview">
-        <div> Error Loading </div>
+        <div> {f("error_loading")} </div>
         <div> {errorText} </div>
       </div>
     );
@@ -728,14 +727,14 @@ const App = (props) => {
   if (nothingToShow) {
     return (
       <div data-testid="reports-overview">
-        <div> Nothing to show yet </div>
+        <div> {f("nothing_to_show")} </div>
       </div>
     );
   }
   if (loading) {
     return (
       <div data-testid="reports-overview">
-        <div> Loading ... </div>
+        <div> {f("loading")} </div>
       </div>
     );
   }
@@ -744,7 +743,7 @@ const App = (props) => {
     return (
       <>
         <style>
-        {`
+          {`
           @container stats (width < 490px) {
             .polis_standalone-statsContainer {
               flex-direction: column;
@@ -754,21 +753,21 @@ const App = (props) => {
         </style>
         <div style={{ container: "stats / inline-size" }}>
           <section className="polis_standalone-statsContainer" style={{ maxWidth: 1200, display: "flex", justifyContent: "space-between", gap: "1rem" }}>
-            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center"}}>
-              <h3>Participants</h3>
-              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0}}>{ptptCountTotal}</p>
+            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center" }}>
+              <h3>{f("participants")}</h3>
+              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0 }}>{ptptCountTotal}</p>
             </div>
-            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center"}}>
-              <h3>Comments</h3>
-              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0}}>{math["n-cmts"]}</p>
+            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center" }}>
+              <h3>{f("comments")}</h3>
+              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0 }}>{math["n-cmts"]}</p>
             </div>
-            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center"}}>
-              <h3>Votes</h3>
-              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0}}>{computeVoteTotal(math["user-vote-counts"])}</p>
+            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center" }}>
+              <h3>{f("votes")}</h3>
+              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0 }}>{computeVoteTotal(math["user-vote-counts"])}</p>
             </div>
-            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center"}}>
-              <h3>Opinion Groups</h3>
-              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0}}>{math["group-clusters"].length}</p>
+            <div style={{ flex: 1, minWidth: "200px", border: "1px solid #333", padding: "1rem", textAlign: "center" }}>
+              <h3>{f("opinion_groups")}</h3>
+              <p style={{ fontFamily: "'VT323', monospace", fontSize: "2.5rem", margin: 0 }}>{math["group-clusters"].length}</p>
             </div>
           </section>
         </div>
@@ -891,7 +890,7 @@ const App = (props) => {
         />
       );
     }
-    
+
     // Otherwise render the topic stats overview
     console.log("RENDERING: TopicStats");
     return (
@@ -962,10 +961,10 @@ const App = (props) => {
           <>
             {searchParamsModel === null && (
               <button onClick={() => setModel((m) => (m === "claude" ? "gemini" : "claude"))}>
-                Toggle Model
+                {f("toggle_model")}
               </button>
             )}
-            <h4>Current Model: {searchParamsModel || model}</h4>
+            <h4>{f("current_model")} {searchParamsModel || model}</h4>
             {parsedNarrativeConsensus ? (
               <ConsensusNarrative
                 math={math}
@@ -979,7 +978,7 @@ const App = (props) => {
                 searchParamsModel={searchParamsModel}
               />
             ) : (
-              "...Loading Consensus \n"
+              f("loading_consensus") + " \n"
             )}
             {parsedNarrativeGroups ? (
               <GroupsNarrative
@@ -993,7 +992,7 @@ const App = (props) => {
                 model={model}
               />
             ) : (
-              "...Loading Groups \n"
+              f("loading_groups") + " \n"
             )}
             {parsedNarrativeUncertainty ? (
               <UncertaintyNarrative

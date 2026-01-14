@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import net from "../../util/net";
+import f from "../../strings/strings";
 
 const TopicsVizReport = ({ report_id }) => {
   const [visualizationJobs, setVisualizationJobs] = useState([]);
@@ -96,27 +96,27 @@ const TopicsVizReport = ({ report_id }) => {
     //   Array.isArray(job.visualizations) && 
     //   job.visualizations.length > 0
     // );
-    
+
     // if (completedJobWithViz) {
     //   console.log(`Using fallback visualization job ${completedJobWithViz.jobId}`);
     //   return completedJobWithViz;
     // }
-    
+
     // // If no completed job with visualizations, return the first job
     return visualizationJobs.filter(job => job.visualizations?.length > 0)[0];
   };
 
   // Get friendly names for different topic granularity levels
   const getTopicLevelName = (layerId, totalLayers) => {
-    if (layerId === 0) return "Finer Grained";
-    if (layerId === totalLayers - 1) return "Coarse";
-    return "Medium";
+    if (layerId === 0) return f("topic_tables_layer_fine");
+    if (layerId === totalLayers - 1) return f("topic_tables_layer_coarse");
+    return f("topic_tables_layer_medium");
   };
 
   const getTopicLevelDescription = (layerId, totalLayers) => {
-    if (layerId === 0) return "(Specific insights)";
-    if (layerId === totalLayers - 1) return "(Big picture themes)";
-    return "(Balanced overview)";
+    if (layerId === 0) return f("topic_tables_layer_fine_desc");
+    if (layerId === totalLayers - 1) return f("topic_tables_layer_coarse_desc");
+    return f("topic_tables_layer_medium_desc");
   };
 
   // Get available layers with topic counts from visualization data and delphi topics
@@ -127,7 +127,7 @@ const TopicsVizReport = ({ report_id }) => {
     }
 
     const layerMap = new Map();
-    
+
     // Get layers from visualizations
     bestJob.visualizations
       .filter((vis) => vis && vis.type === "interactive")
@@ -153,7 +153,7 @@ const TopicsVizReport = ({ report_id }) => {
             const layerIdNum = parseInt(layerId);
             const topicsInLayer = latestRun.topics_by_layer[layerId];
             const topicCount = Object.keys(topicsInLayer).length;
-            
+
             if (layerMap.has(layerIdNum)) {
               layerMap.set(layerIdNum, {
                 layerId: layerIdNum,
@@ -178,7 +178,7 @@ const TopicsVizReport = ({ report_id }) => {
   }, [availableLayers, selectedLayer]);
 
   if (visualizationsLoading) {
-    return <div className="loading">Loading visualizations...</div>;
+    return <div className="loading">{f("topics_viz_report_loading")}</div>;
   }
 
   const bestJob = getBestVisualizationJob();
@@ -405,21 +405,20 @@ const TopicsVizReport = ({ report_id }) => {
       {availableLayers.length > 0 && (
         <div className="layer-switcher">
           <div className="layer-header">
-            <h3>Topic Granularity</h3>
+            <h3>{f("topics_viz_report_granularity")}</h3>
             {bestJob && (
               <div className="job-status-inline">
                 <span className={`job-status status-${bestJob.status}`}>
                   {bestJob.status}
                 </span>
                 <span className="job-date">
-                  Created: {new Date(bestJob.createdAt).toLocaleString()}
+                  {f("comments_report_created")} {new Date(bestJob.createdAt).toLocaleString()}
                 </span>
               </div>
             )}
           </div>
           <p className="switcher-description">
-            Each colored region represents a topic—comments that share similar themes, language, or subject matter. 
-            Polis 2 uses advanced NLP embeddings and hierarchical clustering to mathematically identify these topics. Choose your preferred level of detail: finer grained shows specific subtopics, while coarse shows broader themes.
+            {f("topics_viz_report_desc")}
           </p>
           <div className="layer-buttons">
             {availableLayers.map((layer) => (
@@ -428,7 +427,7 @@ const TopicsVizReport = ({ report_id }) => {
                 className={`layer-button ${selectedLayer === layer.layerId ? 'active' : ''}`}
                 onClick={() => setSelectedLayer(layer.layerId)}
               >
-                {getTopicLevelName(layer.layerId, availableLayers.length)}: {layer.topicCount} Topic{layer.topicCount !== 1 ? 's' : ''}
+                {getTopicLevelName(layer.layerId, availableLayers.length)}: {f("topics_viz_report_count_topics", { count: layer.topicCount })}
                 <span className="layer-description">
                   {getTopicLevelDescription(layer.layerId, availableLayers.length)}
                 </span>
@@ -444,59 +443,59 @@ const TopicsVizReport = ({ report_id }) => {
           <div className="visualization-job">
 
             {bestJob.visualizations &&
-            Array.isArray(bestJob.visualizations) &&
-            bestJob.visualizations.length > 0 ? (
-            <div className="visualizations-grid">
-              {/* Interactive Visualization */}
-              {bestJob.visualizations
-                .filter((vis) => vis && vis.type === "interactive" && vis.layerId === selectedLayer)
-                .map((vis) => (
-                  <div key={vis.key} className="visualization-card">
-                    <h4>Layer {vis.layerId} Interactive Visualization</h4>
-                    <div className="iframe-container">
-                      <iframe
-                        src={vis.url}
-                        title={`Layer ${vis.layerId} visualization`}
-                        width="100%"
-                        height="800"
-                        frameBorder="0"
-                      ></iframe>
+              Array.isArray(bestJob.visualizations) &&
+              bestJob.visualizations.length > 0 ? (
+              <div className="visualizations-grid">
+                {/* Interactive Visualization */}
+                {bestJob.visualizations
+                  .filter((vis) => vis && vis.type === "interactive" && vis.layerId === selectedLayer)
+                  .map((vis) => (
+                    <div key={vis.key} className="visualization-card">
+                      <h4>{f("topics_viz_report_interactive_title", { layer: vis.layerId })}</h4>
+                      <div className="iframe-container">
+                        <iframe
+                          src={vis.url}
+                          title={f("topics_viz_report_vis_title", { layer: vis.layerId })}
+                          width="100%"
+                          height="800"
+                          frameBorder="0"
+                        ></iframe>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-              {/* Static Visualizations */}
-              {bestJob.visualizations
-                .filter(
-                  (vis) =>
-                    vis &&
-                    (vis.type === "static_png" || vis.type === "presentation_png") &&
-                    vis.layerId === selectedLayer
-                )
-                .map((vis) => (
-                  <div key={vis.key} className="visualization-card">
-                    <h4>Layer {vis.layerId} Static Visualization</h4>
-                    <div className="img-container">
-                      <img
-                        src={vis.url}
-                        alt={`Layer ${vis.layerId} visualization`}
-                        width="100%"
-                      />
+                {/* Static Visualizations */}
+                {bestJob.visualizations
+                  .filter(
+                    (vis) =>
+                      vis &&
+                      (vis.type === "static_png" || vis.type === "presentation_png") &&
+                      vis.layerId === selectedLayer
+                  )
+                  .map((vis) => (
+                    <div key={vis.key} className="visualization-card">
+                      <h4>{f("topics_viz_report_static_title", { layer: vis.layerId })}</h4>
+                      <div className="img-container">
+                        <img
+                          src={vis.url}
+                          alt={f("topics_viz_report_vis_title", { layer: vis.layerId })}
+                          width="100%"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <div className="no-visualizations-message">
-              <p>No visualizations available for this job yet.</p>
-              <p>Visualizations may take a few minutes to generate.</p>
-            </div>
-          )}
+                  ))}
+              </div>
+            ) : (
+              <div className="no-visualizations-message">
+                <p>{f("topics_viz_report_no_vis")}</p>
+                <p>{f("topics_viz_report_vis_wait")}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="no-visualizations-message">
-            <p>No visualization jobs found.</p>
-            <p>Run a Delphi analysis to generate topic visualizations on the <a target="_blank" rel="noreferrer" href={`/commentsReport/${report_id}`}>Comments Report page.</a></p>
+            <p>{f("topics_viz_report_no_jobs")}</p>
+            <p>{f("topic_report_generate_hint")} <a target="_blank" rel="noreferrer" href={`/commentsReport/${report_id}`}>{f("topic_report_comments_report_link")}</a></p>
           </div>
         )}
       </div>

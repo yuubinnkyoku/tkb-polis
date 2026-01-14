@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import net from "../../util/net";
 import CommentList from "../lists/commentList.jsx";
 import { canGenerateCollectiveStatement, getTopicConsensusValues } from "../../util/consensusThreshold";
+import f from "../../strings/strings";
 
 const CollectiveStatementModal = ({
   isOpen,
@@ -35,7 +36,7 @@ const CollectiveStatementModal = ({
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
@@ -45,19 +46,19 @@ const CollectiveStatementModal = ({
       const response = await net.polisGet("/api/v3/collectiveStatement", {
         report_id: reportId
       });
-      
+
       if (response.status === "success" && response.statements && response.statements.length > 0) {
         // Find statements for this topic
-        const topicStatements = response.statements.filter(stmt => 
+        const topicStatements = response.statements.filter(stmt =>
           stmt.topic_key === topicKey
         );
-        
+
         if (topicStatements.length > 0) {
           // Use the most recent statement
-          const mostRecent = topicStatements.sort((a, b) => 
+          const mostRecent = topicStatements.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           )[0];
-          
+
           return mostRecent;
         }
       }
@@ -72,10 +73,10 @@ const CollectiveStatementModal = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       // First check if we have an existing statement
       const existingStatement = await checkExistingStatements();
-      
+
       if (existingStatement) {
         console.log("Using existing collective statement from", existingStatement.created_at);
         setStatementData(existingStatement.statement_data);
@@ -92,24 +93,24 @@ const CollectiveStatementModal = ({
       const topicStats = await net.polisGet("/api/v3/topicStats", {
         report_id: reportId,
       });
-      
+
       let topicCommentIds = [];
       if (topicStats.status === "success" && topicStats.stats[topicKey]) {
         topicCommentIds = topicStats.stats[topicKey].comment_tids || [];
       }
-      
+
       // Check if this topic can generate a collective statement
       const statementCheck = canGenerateCollectiveStatement(topicCommentIds, math);
-      
+
       if (!statementCheck.canGenerate) {
         setError(statementCheck.message);
         setLoading(false);
         return;
       }
-      
+
       // Get only the qualifying comment IDs
       const qualifyingTids = statementCheck.details.map(comment => comment.tid);
-      
+
       // Get the consensus values only for qualifying comments
       const relevantConsensus = {};
       const consensusData = math["group-consensus-normalized"] || math["group-aware-consensus"];
@@ -136,7 +137,7 @@ const CollectiveStatementModal = ({
           model: response.model
         });
       } else {
-        setError(response.message || "Failed to generate statement");
+        setError(response.message || f("comments_report_fail_retrieve"));
       }
     } catch (err) {
       console.error("Error generating collective statement:", err);
@@ -211,15 +212,15 @@ const CollectiveStatementModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          style={{ 
+          style={{
             display: "flex",
             height: "100%",
             overflow: "hidden"
           }}
         >
           {/* Left sidebar with title */}
-          <div 
-            style={{ 
+          <div
+            style={{
               width: "150px",
               padding: "20px 10px",
               borderRight: "2px solid #eee",
@@ -231,7 +232,7 @@ const CollectiveStatementModal = ({
               flexShrink: 0
             }}
           >
-            <div style={{ 
+            <div style={{
               writingMode: "vertical-rl",
               textOrientation: "mixed",
               textAlign: "center",
@@ -240,13 +241,13 @@ const CollectiveStatementModal = ({
               maxHeight: "80vh"
             }}>
               <h2 style={{ margin: 0, marginBottom: "10px", fontSize: "1.4em" }}>{topicName}</h2>
-              <p style={{ margin: 0, color: "#333", fontSize: "0.95em", fontWeight: "500" }}>Candidate Collective Statement</p>
-              <p style={{ margin: 0, marginTop: "8px", color: "#666", fontSize: "0.85em", fontStyle: "italic" }}>Based on voting trends thus far</p>
+              <p style={{ margin: 0, color: "#333", fontSize: "0.95em", fontWeight: "500" }}>{f("collective_statement_title")}</p>
+              <p style={{ margin: 0, marginTop: "8px", color: "#666", fontSize: "0.85em", fontStyle: "italic" }}>{f("collective_statement_modal_trends")}</p>
             </div>
           </div>
-          
+
           {/* Main content area */}
-          <div style={{ 
+          <div style={{
             flex: 1,
             display: "flex",
             flexDirection: "column",
@@ -254,16 +255,16 @@ const CollectiveStatementModal = ({
           }}>
 
             {loading && (
-              <div style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center", 
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 height: "100%",
                 flexDirection: "column"
               }}>
-                <p>Generating candidate collective statement...</p>
+                <p>{f("collective_statement_modal_generating")}</p>
                 <p style={{ fontSize: "0.85em", color: "#666", marginTop: "10px" }}>
-                  This may take a moment as we analyze voting patterns and comments.
+                  {f("collective_statement_modal_wait")}
                 </p>
               </div>
             )}
@@ -291,7 +292,7 @@ const CollectiveStatementModal = ({
                 }}
               >
                 {/* Left side: Collective Statement */}
-                <div style={{ 
+                <div style={{
                   flex: "0 0 45%",
                   display: "flex",
                   flexDirection: "column",
@@ -303,10 +304,10 @@ const CollectiveStatementModal = ({
                     overflowY: "auto"
                   }}>
                     <div style={{ marginBottom: "20px" }}>
-                      <h3 style={{ marginTop: 0, marginBottom: "5px", fontSize: "1.2em" }}>Candidate Collective Statement</h3>
+                      <h3 style={{ marginTop: 0, marginBottom: "5px", fontSize: "1.2em" }}>{f("collective_statement_title")}</h3>
                       {statementMetadata && !isNaN(new Date(statementMetadata.created_at).getTime()) && (
                         <p style={{ margin: 0, fontSize: "0.85em", color: "#666" }}>
-                          Generated {new Date(statementMetadata.created_at).toLocaleDateString()} at {new Date(statementMetadata.created_at).toLocaleTimeString()} 
+                          {f("collective_generated")} {new Date(statementMetadata.created_at).toLocaleDateString()} {f("collective_at")} {new Date(statementMetadata.created_at).toLocaleTimeString()}
                           {statementMetadata.model && ` (${statementMetadata.model.includes('claude') ? 'Claude Opus 4' : statementMetadata.model})`}
                         </p>
                       )}
@@ -317,41 +318,41 @@ const CollectiveStatementModal = ({
                         fontSize: "1.05em"
                       }}
                     >
-                {statementData &&
-                  statementData.paragraphs &&
-                  statementData.paragraphs.map((paragraph, idx) => (
-                    <div key={idx} style={{ marginBottom: "20px" }}>
-                      <h4 style={{ marginTop: 0, marginBottom: "10px", color: "#333" }}>
-                        {paragraph.title}
-                      </h4>
-                      {paragraph.sentences &&
-                        paragraph.sentences.map((sentence, sIdx) => (
-                          <p key={sIdx} style={{ marginBottom: "10px" }}>
-                            {sentence.clauses &&
-                              sentence.clauses.map((clause, cIdx) => (
-                                <span key={cIdx}>
-                                  {clause.text}
-                                  {clause.citations && clause.citations.length > 0 && (
-                                    <sup
-                                      style={{
-                                        color: "#007bff",
-                                        fontSize: "0.8em",
-                                        marginLeft: "2px",
-                                      }}
-                                    >
-                                      [{clause.citations.join(", ")}]
-                                    </sup>
-                                  )}
-                                  {cIdx < sentence.clauses.length - 1 && " "}
-                                </span>
+                      {statementData &&
+                        statementData.paragraphs &&
+                        statementData.paragraphs.map((paragraph, idx) => (
+                          <div key={idx} style={{ marginBottom: "20px" }}>
+                            <h4 style={{ marginTop: 0, marginBottom: "10px", color: "#333" }}>
+                              {paragraph.title}
+                            </h4>
+                            {paragraph.sentences &&
+                              paragraph.sentences.map((sentence, sIdx) => (
+                                <p key={sIdx} style={{ marginBottom: "10px" }}>
+                                  {sentence.clauses &&
+                                    sentence.clauses.map((clause, cIdx) => (
+                                      <span key={cIdx}>
+                                        {clause.text}
+                                        {clause.citations && clause.citations.length > 0 && (
+                                          <sup
+                                            style={{
+                                              color: "#007bff",
+                                              fontSize: "0.8em",
+                                              marginLeft: "2px",
+                                            }}
+                                          >
+                                            [{clause.citations.join(", ")}]
+                                          </sup>
+                                        )}
+                                        {cIdx < sentence.clauses.length - 1 && " "}
+                                      </span>
+                                    ))}
+                                </p>
                               ))}
-                          </p>
+                          </div>
                         ))}
                     </div>
-                  ))}
-                    </div>
                   </div>
-                  
+
                   {/* Footer note in left column */}
                   <div
                     style={{
@@ -361,8 +362,7 @@ const CollectiveStatementModal = ({
                     }}
                   >
                     <p style={{ margin: 0, fontSize: "0.85em", color: "#666", marginBottom: "15px" }}>
-                      <strong>Note:</strong> This candidate collective statement was generated using AI based on the voting patterns and comments from all participants. It represents
-                      areas of shared understanding and consensus on this topic.
+                      <strong>{f("collective_statement_modal_note")}</strong> {f("collective_statement_modal_note_desc")}
                     </p>
                     <button
                       onClick={onClose}
@@ -376,38 +376,38 @@ const CollectiveStatementModal = ({
                         fontSize: "1em",
                       }}
                     >
-                      Close
+                      {f("comments_report_close")}
                     </button>
                   </div>
                 </div>
 
                 {/* Right side: Cited Comments */}
-                <div style={{ 
+                <div style={{
                   flex: "0 0 55%",
                   padding: "30px",
                   overflowY: "auto",
                   backgroundColor: "#fafafa"
                 }}>
                   <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "1.2em" }}>
-                    Cited Comments
+                    {f("collective_cited_comments")}
                   </h3>
                   {comments && comments.length > 0 && statementData ? (
                     <div>
-                  <CommentList
-                    conversation={conversation}
-                    ptptCount={ptptCount}
-                    math={math}
-                    formatTid={formatTid}
-                    tidsToRender={extractCitations(statementData)}
-                    comments={comments}
-                    voteColors={
-                      voteColors || {
-                        agree: "#21a53a",
-                        disagree: "#e74c3c",
-                        pass: "#b3b3b3",
-                      }
-                    }
-                  />
+                      <CommentList
+                        conversation={conversation}
+                        ptptCount={ptptCount}
+                        math={math}
+                        formatTid={formatTid}
+                        tidsToRender={extractCitations(statementData)}
+                        comments={comments}
+                        voteColors={
+                          voteColors || {
+                            agree: "#21a53a",
+                            disagree: "#e74c3c",
+                            pass: "#b3b3b3",
+                          }
+                        }
+                      />
                     </div>
                   ) : (
                     <div
@@ -419,7 +419,7 @@ const CollectiveStatementModal = ({
                         borderRadius: "8px",
                       }}
                     >
-                      No comments referenced
+                      {f("collective_no_comments")}
                     </div>
                   )}
                 </div>

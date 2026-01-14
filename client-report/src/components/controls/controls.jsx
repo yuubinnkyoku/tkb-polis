@@ -2,6 +2,7 @@
 
 import Checkbox from "../framework/checkbox.jsx";
 import React from "react";
+import f from "../../strings/strings";
 import settings from "../../settings";
 
 const Controls = ({
@@ -23,7 +24,7 @@ const Controls = ({
   return (
     <div>
       <Checkbox
-        label="auto-refresh"
+        label={f("auto_refresh")}
         disabled={false}
         checked={autoRefreshEnabled}
         clickHandler={checkboxGroupChanged}
@@ -32,7 +33,7 @@ const Controls = ({
         color={settings.polisBlue}
       />
       <Checkbox
-        label="color blind mode"
+        label={f("color_blind_mode")}
         disabled={false}
         checked={colorBlindMode}
         clickHandler={handleColorblindModeClick}

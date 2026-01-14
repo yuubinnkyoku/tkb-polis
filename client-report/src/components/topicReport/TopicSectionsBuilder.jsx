@@ -1,4 +1,5 @@
 import React from 'react';
+import f from "../../strings/strings";
 
 const TopicSectionsBuilder = ({ topicData, narrativeData, children }) => {
   console.log("TopicSectionsBuilder: Processing data");
@@ -23,16 +24,16 @@ const TopicSectionsBuilder = ({ topicData, narrativeData, children }) => {
     }
 
     const globalSectionTypes = [
-      { key: 'groups', name: 'Divisive Comments (Global)', sortKey: -300 },
-      { key: 'group_informed_consensus', name: 'Cross-Group Consensus (Global)', sortKey: -200 },
-      { key: 'uncertainty', name: 'High Uncertainty Comments (Global)', sortKey: -100 }
+      { key: 'groups', name: f("topic_sections_divisive_global"), sortKey: -300 },
+      { key: 'group_informed_consensus', name: f("topic_sections_consensus_global"), sortKey: -200 },
+      { key: 'uncertainty', name: f("topic_sections_uncertainty_global"), sortKey: -100 }
     ];
 
     return globalSectionTypes.map(({ key, name, sortKey }) => {
       // Check what keys actually exist in the narrative reports
       const longFormatKey = narrativeData?.current_job_id ? `${narrativeData.current_job_id}_global_${key}` : null;
       const shortFormatKey = `global_${key}`;
-      
+
       let sectionKey;
       if (narrativeData?.reports) {
         // Check which format exists in the data
@@ -71,11 +72,11 @@ const TopicSectionsBuilder = ({ topicData, narrativeData, children }) => {
 
     Object.keys(latestRun.topics_by_layer).forEach(layer => {
       const clusters = latestRun.topics_by_layer[layer];
-      
+
       if (clusters && typeof clusters === 'object') {
         Object.entries(clusters).forEach(([clusterId, topic]) => {
           const topicKey = `${layer}_${clusterId}`;
-          
+
           // Extract section key from topic_key, converting # to _
           let sectionKey;
           if (topic.topic_key && topic.topic_key.includes('#')) {
@@ -86,7 +87,7 @@ const TopicSectionsBuilder = ({ topicData, narrativeData, children }) => {
             sectionKey = topic.topic_key || `layer${layer}_${clusterId}`;
           }
 
-          
+
           allTopics.push({
             key: sectionKey,
             displayKey: topicKey,
@@ -101,12 +102,12 @@ const TopicSectionsBuilder = ({ topicData, narrativeData, children }) => {
   };
 
   const latestRun = getLatestRun();
-  
+
   if (!latestRun) {
-    return children({ 
-      sections: [], 
-      runInfo: null, 
-      error: "No topic runs found" 
+    return children({
+      sections: [],
+      runInfo: null,
+      error: f("topic_sections_no_runs")
     });
   }
 
@@ -122,15 +123,15 @@ const TopicSectionsBuilder = ({ topicData, narrativeData, children }) => {
   };
 
   console.log(`TopicSectionsBuilder: Built ${allSections.length} sections (${globalSections.length} global, ${layerTopics.length} topics)`);
-  
+
   // Find the cross-group consensus section for default selection
-  const defaultSection = allSections.find(section => 
+  const defaultSection = allSections.find(section =>
     section.isGlobal && section.name.includes('Cross-Group Consensus')
   );
-  
-  return children({ 
-    sections: allSections, 
-    runInfo, 
+
+  return children({
+    sections: allSections,
+    runInfo,
     error: null,
     defaultSectionKey: defaultSection?.key || null
   });

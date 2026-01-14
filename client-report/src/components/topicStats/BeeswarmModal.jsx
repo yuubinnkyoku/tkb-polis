@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
+import f from "../../strings/strings";
 import TopicBeeswarm from './visualizations/TopicBeeswarm.jsx';
 
-const BeeswarmModal = ({ 
-  isOpen, 
-  onClose, 
-  topicName, 
-  topicKey, 
+const BeeswarmModal = ({
+  isOpen,
+  onClose,
+  topicName,
+  topicKey,
   topicStats,
   comments,
   math,
@@ -21,7 +22,7 @@ const BeeswarmModal = ({
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
@@ -42,7 +43,7 @@ const BeeswarmModal = ({
       justifyContent: 'center',
       zIndex: 1000
     }}
-    onClick={onClose}>
+      onClick={onClose}>
       <div style={{
         backgroundColor: 'white',
         borderRadius: '8px',
@@ -53,7 +54,7 @@ const BeeswarmModal = ({
         flexDirection: 'column',
         overflow: 'hidden'
       }}
-      onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={{
           padding: '20px',
@@ -88,10 +89,9 @@ const BeeswarmModal = ({
         }}>
           {/* Beeswarm Visualization */}
           <div style={{ width: '100%' }}>
-            <h3 style={{ marginTop: 0, textAlign: 'center' }}>Group-Aware Consensus Distribution</h3>
+            <h3 style={{ marginTop: 0, textAlign: 'center' }}>{f("beeswarm_modal_title")}</h3>
             <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px', textAlign: 'center' }}>
-              Each circle represents a comment. Position shows how similarly groups voted. 
-              Hover to see the group vote breakdown.
+              {f("beeswarm_modal_desc")}
             </p>
             <TopicBeeswarm
               comments={comments}
