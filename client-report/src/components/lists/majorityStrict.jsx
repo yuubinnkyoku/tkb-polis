@@ -4,6 +4,7 @@ import React from "react";
 import * as globals from "../globals";
 import CommentList from "./commentList.jsx";
 import Legend from "../framework/legend.jsx";
+import f from "../../strings/strings";
 
 const MajorityStrict = ({
   conversation,
@@ -15,7 +16,7 @@ const MajorityStrict = ({
   voteColors,
 }) => {
   if (!conversation) {
-    return <div>Loading Majority (strict)...</div>;
+    return <div>{f("majority_strict_loading")}</div>;
   }
 
   // const _comments = _.keyBy(comments, "tid");
@@ -29,11 +30,10 @@ const MajorityStrict = ({
 
   return (
     <div>
-      <p style={globals.primaryHeading}> Majority </p>
-      <p style={globals.paragraph}>Here&apos;s what most people agreed with.</p>
+      <p style={globals.primaryHeading}> {f("majority_strict_title")} </p>
+      <p style={globals.paragraph}>{f("majority_strict_subtitle")}</p>
       <p style={globals.paragraph}>
-        60% or more of all participants voted one way or the other, regardless of whether large
-        amounts of certain minority opinion groups voted the other way.
+        {f("majority_strict_description")}
       </p>
       <Legend voteColors={voteColors} />
       <div style={{ marginTop: 20 }}>

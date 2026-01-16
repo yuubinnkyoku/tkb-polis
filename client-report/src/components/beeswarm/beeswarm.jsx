@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import CommentList from "../lists/commentList.jsx";
 import * as globals from "../globals";
 import _ from "lodash";
+import f from "../../strings/strings";
 // import Flex from "../framework/flex"
 
 // function type(d) {
@@ -85,14 +86,14 @@ const VoronoiCells = ({ currentBeeswarmComment, voronoi, onHoverCallback }) => {
         voronoi.map((cell, i) => {
           return (
             <g key={i} onMouseEnter={onHoverCallback(cell)}>
-              <path fill="none" style={{pointerEvents: "all"}} d={"M" + cell.join("L") + "Z"}/>
+              <path fill="none" style={{ pointerEvents: "all" }} d={"M" + cell.join("L") + "Z"} />
 
               <circle
                 r={3}
                 fill={getFill(cell)}
                 cx={cell.data.x}
                 cy={cell.data.y}
-                />
+              />
             </g>
           )
         })
@@ -103,17 +104,17 @@ const VoronoiCells = ({ currentBeeswarmComment, voronoi, onHoverCallback }) => {
 
 const Beeswarm = ({ comments, extremity, probabilitiesTids, probabilities, conversation, ptptCount, math, formatTid, voteColors }) => {
 
-    const svgWidth = 960;
-    const svgHeight = 200;
-    const margin = {top: 10, right: 10, bottom: 10, left: 10};
-    const widthMinusMargins = 960 - margin.left - margin.right;
-    const heightMinusMargins = 200 - margin.top - margin.bottom;
+  const svgWidth = 960;
+  const svgHeight = 200;
+  const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+  const widthMinusMargins = 960 - margin.left - margin.right;
+  const heightMinusMargins = 200 - margin.top - margin.bottom;
 
-    const [currentBeeswarmComment, setCurrentBeeswarmComment] = useState(null);
-    const [commentsWithExtremity, setCommentsWithExtremity] = useState(null);
-    const [x, setX] = useState(null);
-    const [axesRendered, setAxesRendered] = useState(false);
-    const[vor, setVoronoi] = useState(null);
+  const [currentBeeswarmComment, setCurrentBeeswarmComment] = useState(null);
+  const [commentsWithExtremity, setCommentsWithExtremity] = useState(null);
+  const [x, setX] = useState(null);
+  const [axesRendered, setAxesRendered] = useState(false);
+  const [vor, setVoronoi] = useState(null);
 
   const onHoverCallback = (d) => {
     return () => {
@@ -125,7 +126,7 @@ const Beeswarm = ({ comments, extremity, probabilitiesTids, probabilities, conve
     const commentsWithExtremityPlaceHolder = [];
     _.each(comments, (comment) => {
       if (extremity[comment.tid] > 0) {
-        const cwe = Object.assign({}, comment, {extremity: extremity[comment.tid]});
+        const cwe = Object.assign({}, comment, { extremity: extremity[comment.tid] });
         commentsWithExtremityPlaceHolder.push(cwe)
       }
     })
@@ -133,23 +134,23 @@ const Beeswarm = ({ comments, extremity, probabilitiesTids, probabilities, conve
     var x = window.d3.scaleLinear()
       .rangeRound([0, widthMinusMargins]);
 
-    x.domain(window.d3.extent(commentsWithExtremityPlaceHolder, function(d) { return d.extremity; }));
+    x.domain(window.d3.extent(commentsWithExtremityPlaceHolder, function (d) { return d.extremity; }));
 
     var simulation = window.d3.forceSimulation(commentsWithExtremityPlaceHolder)
-        .force("x", window.d3.forceX(function(d) {
-          return x(d.extremity);
-        }).strength(1))
-        .force("y", window.d3.forceY(heightMinusMargins / 2))
-        .force("collide", window.d3.forceCollide(4))
-        .stop();
+      .force("x", window.d3.forceX(function (d) {
+        return x(d.extremity);
+      }).strength(1))
+      .force("y", window.d3.forceY(heightMinusMargins / 2))
+      .force("collide", window.d3.forceCollide(4))
+      .stop();
 
     for (var i = 0; i < 120; ++i) simulation.tick();
 
     const voronoi = window.d3.voronoi()
       .extent([[-margin.left, -margin.top], [widthMinusMargins + margin.right, heightMinusMargins + margin.top]])
-      .x(function(d) { return d.x; })
-      .y(function(d) { return d.y; })
-    .polygons(commentsWithExtremityPlaceHolder)
+      .x(function (d) { return d.x; })
+      .y(function (d) { return d.y; })
+      .polygons(commentsWithExtremityPlaceHolder)
 
     // if (!this.state.axesRendered) {
     //   d3.select("#beeswarmAxisAttachPointD3").append("g")
@@ -162,7 +163,7 @@ const Beeswarm = ({ comments, extremity, probabilitiesTids, probabilities, conve
     setVoronoi(voronoi);
     setCommentsWithExtremity(commentsWithExtremityPlaceHolder);
     setAxesRendered(true);
-}
+  }
 
   useEffect(() => {
     if (
@@ -173,39 +174,39 @@ const Beeswarm = ({ comments, extremity, probabilitiesTids, probabilities, conve
       setup();
     }
   }, []);
-  
-  
+
+
   return (
-    <div style={{width: svgWidth}}>
-      <p style={globals.primaryHeading}> How divisive was the conversation? </p>
+    <div style={{ width: svgWidth }}>
+      <p style={globals.primaryHeading}> {f("beeswarm_divisiveness_title")} </p>
       <p style={globals.paragraph}>
-        Statements (here as little circles) to the left were voted on the same way—either everyone agreed or everyone disagreed. Statements to the right were divisive—participants were split between agreement and disagreement.
+        {f("beeswarm_divisiveness_desc")}
       </p>
       <p style={globals.paragraph}>
-        <strong>How to use this:</strong> Hover to see the statement text. Start on the far right to find out what the most divisive statement was.
+        <strong>{f("beeswarm_usage_bold")}</strong> {f("beeswarm_usage_desc")}
       </p>
       <svg width={svgWidth} height={svgHeight}>
         <g id="beeswarmAxisAttachPointD3" transform={"translate(" + margin.left + "," + margin.top + ")"}>
           {
             commentsWithExtremity ?
-            <VoronoiCells
-              probabilitiesTids={probabilitiesTids}
-              probabilities={currentBeeswarmComment ? probabilities[currentBeeswarmComment.tid] : null}
-              currentBeeswarmComment={currentBeeswarmComment}
-              voronoi={vor}
-              onHoverCallback={onHoverCallback}/> : null
+              <VoronoiCells
+                probabilitiesTids={probabilitiesTids}
+                probabilities={currentBeeswarmComment ? probabilities[currentBeeswarmComment.tid] : null}
+                currentBeeswarmComment={currentBeeswarmComment}
+                voronoi={vor}
+                onHoverCallback={onHoverCallback} /> : null
           }
         </g>
-        <line x1="0" y1={svgHeight - 10} x2={svgWidth} y2={svgHeight - 10} strokeWidth="1" stroke="black"/>
+        <line x1="0" y1={svgHeight - 10} x2={svgWidth} y2={svgHeight - 10} strokeWidth="1" stroke="black" />
       </svg>
-      <div style={{display: "flex", justifyContent: "space-between", margin: 0}}>
-        <p style={{margin: 0}}> Consensus statements </p>
-        <p style={{margin: 0}}> Divisive statements</p>
+      <div style={{ display: "flex", justifyContent: "space-between", margin: 0 }}>
+        <p style={{ margin: 0 }}> {f("beeswarm_consensus_label")} </p>
+        <p style={{ margin: 0 }}> {f("beeswarm_divisive_label")} </p>
       </div>
       {/*<ProbabilityLegend/>*/}
 
-      <div style={{minHeight: "140px", paddingTop: "20px"}}>
-        { currentBeeswarmComment ?
+      <div style={{ minHeight: "140px", paddingTop: "20px" }}>
+        {currentBeeswarmComment ?
 
           <CommentList
             conversation={conversation}
@@ -214,7 +215,7 @@ const Beeswarm = ({ comments, extremity, probabilitiesTids, probabilities, conve
             formatTid={formatTid}
             tidsToRender={[currentBeeswarmComment.tid]}
             comments={comments}
-            voteColors={voteColors}/> : null
+            voteColors={voteColors} /> : null
         }
       </div>
 

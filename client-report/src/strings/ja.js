@@ -248,11 +248,75 @@ const s = {
     topics_viz_report_vis_wait: "可視化データの生成には数分かかる場合があります。",
     topics_viz_report_no_jobs: "可視化ジョブが見つかりません。",
 
+    // Lists: Majority Strict
+    majority_strict_loading: "多数意見（厳格）を読み込み中...",
+    majority_strict_title: "多数意見",
+    majority_strict_subtitle: "以下は、ほとんどの人が賛成した意見です。",
+    majority_strict_description: "全ての参加者の60%以上が特定の方法で投票しており、特定の少数意見グループが反対に投票したかどうかに関わらず、全体的な傾向を示しています。",
+
+    // Lists: Uncertainty
+    uncertainty_loading: "不確実性を読み込み中...",
+    uncertainty_title: "不確実な領域",
+    uncertainty_subtitle: "不確実な領域は、コミュニティとの対話や情報提供のための手掛かりとなります。",
+    uncertainty_description: "全{count}人の参加者全体において、以下の意見については不確実性が見られました。これらの意見を見た参加者の30%以上が「パス」を選択しています。",
+
+    // Lists: All Comments Moderated In
+    all_comments_loading: "全ての承認済み意見を読み込み中...",
+    all_comments_title: "全ての意見",
+    all_comments_description: "モデレーションで除外されたものを除く、全ての意見に対するグループ投票の結果。",
+    all_comments_sort_label: "並べ替え：",
+    all_comments_sort_tid: "意見ID",
+    all_comments_sort_consensus: "グループを考慮した共通認識",
+    all_comments_sort_numvotes: "投票数",
+    all_comments_sort_pct_agreed: "賛成率",
+    all_comments_sort_pct_disagreed: "反対率",
+    all_comments_sort_pct_passed: "パス率",
+
+    // Lists: Narratives
+    narrative_hallucination_warning: "このナラティブ・サマリーには誤りが含まれている可能性があります。各節を確認してください。",
+    narrative_error: "ナラティブデータの解析エラー",
+    consensus_narrative_title: "グループ間の共通認識",
+    groups_narrative_title: "グループ間の相違点",
+    uncertainty_narrative_title: "不確実な領域",
+
+    // Lists: Participant Groups
+    participant_groups_loading: "グループを読み込み中...",
+    participant_groups_title: "意見グループ",
+    participant_groups_description: "{count}人の全参加者の中で、{groupCount}つの意見グループが出現しました。意見グループを定義する要素は2つあります。第一に、各意見グループは複数の意見に対して似た投票傾向を持つ参加者で構成されています。第二に、似た投票傾向を持つ各グループは、他のグループとは明確に異なる投票を行っています。",
+
+    // App Errors
+    app_select_comments_error: "意見を選択してください",
+    app_select_comments_reject: "現在、マトリックスに表示するために選択された意見はありません。",
+
     // Headers & Overview placeholders
     majority_opinion: "主要な意見",
     uncertainty: "不確実な項目",
     all_comments: "すべての意見",
     participant_groups: "参加者グループ",
+    // Beeswarm
+    beeswarm_divisiveness_title: "会話はどれくらい分裂していましたか？",
+    beeswarm_divisiveness_desc: "左側の意見（小さな円）は、全員が賛成または全員が反対するなど、同じように投票されたものです。右側の意見は意見が分かれたもので、参加者の賛成と反対が分かれました。",
+    beeswarm_usage_bold: "使い方：",
+    beeswarm_usage_desc: " カーソルを合わせると意見のテキストが表示されます。最も意見が分かれた意見を見つけるには、一番右から見てください。",
+    beeswarm_consensus_label: "合意のある意見",
+    beeswarm_divisive_label: "意見が分かれた意見",
+
+    // Participants Graph
+    participants_graph_title: "グラフ",
+    participants_graph_subtitle: "どの意見が似たような投票結果になりましたか？また、参加者同士はどのような関係にありますか？",
+    participants_graph_description: "このグラフでは、似たような投票結果になった意見同士が近くに配置されています。参加者も、賛成した意見の近くに、反対した意見からは遠くに配置されています。つまり、似たような投票をした参加者同士は近くに集まっています。",
+    participants_graph_btn_axes: "軸",
+    participants_graph_btn_radial: "放射軸",
+    participants_graph_btn_statements: "意見",
+    participants_graph_btn_participants: "参加者（バケット化）",
+    participants_graph_btn_group_outline: "グループの外枠",
+    participants_graph_btn_group_labels: "グループラベル",
+    participants_graph_click_hint: "番号で識別される意見をクリックして、グラフの領域を探索してください。",
+    // Comment
+    comment_agreed: "賛成",
+    comment_disagreed: "反対",
+    comment_passed: "パス",
+    comment_metadata: "メタデータ: ",
 }
 
 export default s

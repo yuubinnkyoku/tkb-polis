@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Group from "./participantGroup.jsx";
 import * as globals from "../globals.js";
 import Metadata from "./metadata.jsx";
+import f from "../../strings/strings";
 
 const ParticipantGroups = ({
   conversation,
@@ -96,14 +97,12 @@ const ParticipantGroups = ({
   return (
     <div style={styles}>
       <div>
-        <p style={globals.primaryHeading}> Opinion Groups </p>
+        <p style={globals.primaryHeading}> {f("participant_groups_title")} </p>
         <p style={globals.paragraph}>
-          Across {ptptCount} total participants, {math && Object.keys(math["group-votes"])?.length}{" "}
-          opinion groups emerged. There are two factors that define an opinion
-          group. First, each opinion group is made up of a number of participants
-          who tended to vote similarly on multiple statements. Second, each group
-          of participants who voted similarly will have also voted distinctly
-          differently from other groups.
+          {f("participant_groups_description", {
+            count: ptptCount,
+            groupCount: math && Object.keys(math["group-votes"])?.length || 0
+          })}
         </p>
         <Metadata
           math={math}
@@ -114,7 +113,7 @@ const ParticipantGroups = ({
           formatTid={formatTid}
         />
         {isLoading ? (
-          <div>Loading Groups</div>
+          <div>{f("participant_groups_loading")}</div>
         ) : (
           groups
         )}

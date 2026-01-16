@@ -365,8 +365,8 @@ const App = (props) => {
             response &&
             response.status === "polis_report_needs_comment_selection"
           ) {
-            setErrorText("Select some comments");
-            reject("Currently, No comments are selected for display in the matrix.");
+            setErrorText(f("app_select_comments_error"));
+            reject(f("app_select_comments_reject"));
           } else {
             resolve(response);
           }
@@ -1008,7 +1008,7 @@ const App = (props) => {
                 searchParamsModel={searchParamsModel}
               />
             ) : (
-              "...Loading Uncertainty \n"
+              f("loading_uncertainty") + " \n"
             )}
             {Object.keys(narrative || {})
               .filter((key) => key.startsWith("topic_"))

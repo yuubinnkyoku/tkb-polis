@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import Flex from "./flex";
 import * as globals from "./globals";
 import BarChart from "./barChart";
+import f from "../strings/strings";
 
 const Comment = ({ dispatch, params, acceptButton, rejectButton, acceptClickHandler, rejectClickHandler, comment, formatTid, conversation, ptptCount }) => {
   const getDate = () => {
@@ -16,7 +17,7 @@ const Comment = ({ dispatch, params, acceptButton, rejectButton, acceptClickHand
     if (typeof comment.agree_count !== "undefined") {
       return (
         <span>
-          ({comment.agree_count} agreed, {comment.disagree_count} disagreed, {comment.pass_count} passed)
+          ({comment.agree_count} {f("comment_agreed")}, {comment.disagree_count} {f("comment_disagreed")}, {comment.pass_count} {f("comment_passed")})
         </span>
       );
     }
@@ -38,7 +39,7 @@ const Comment = ({ dispatch, params, acceptButton, rejectButton, acceptClickHand
     >
       <Flex alignItems="baseline" justifyContent="flex-start" styleOverrides={{ width: globals.paragraphWidth }}>
         <span style={{ ...styles }}>
-          {formatTid(comment.tid)} - {comment.is_meta ? "Metadata: " : ""}
+          {formatTid(comment.tid)} - {comment.is_meta ? f("comment_metadata") : ""}
           {comment.txt}
         </span>
       </Flex>

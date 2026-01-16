@@ -248,11 +248,69 @@ const s = {
     topics_viz_report_vis_wait: "Visualizations may take a few minutes to generate.",
     topics_viz_report_no_jobs: "No visualization jobs found.",
 
-    // Headers & Overview placeholders
-    majority_opinion: "Majority Opinion",
-    uncertainty: "Uncertainty",
-    all_comments: "All Comments",
-    participant_groups: "Participant Groups",
+    // Lists: Majority Strict
+    majority_strict_loading: "Loading Majority (strict)...",
+    majority_strict_title: "Majority",
+    majority_strict_subtitle: "Here's what most people agreed with.",
+    majority_strict_description: "60% or more of all participants voted one way or the other, regardless of whether large amounts of certain minority opinion groups voted the other way.",
+
+    // Lists: Uncertainty
+    uncertainty_loading: "Loading Uncertainty...",
+    uncertainty_title: "Areas of uncertainty",
+    uncertainty_subtitle: "Areas of uncertainty can provide avenues to educate and open dialogue with your community.",
+    uncertainty_description: "Across all {count} participants, there was uncertainty about the following statements. Greater than 30% of participants who saw these statements 'passed'.",
+
+    // Lists: All Comments Moderated In
+    all_comments_loading: "Loading allCommentsModeratedIn...",
+    all_comments_title: "All statements",
+    all_comments_description: "Group votes across all statements, excluding those statements which were moderated out.",
+    all_comments_sort_label: "Sort by: ",
+    all_comments_sort_tid: "Statement Id",
+    all_comments_sort_consensus: "Group-informed Consensus",
+    all_comments_sort_numvotes: "Number of votes",
+    all_comments_sort_pct_agreed: "% Agreed",
+    all_comments_sort_pct_disagreed: "% Disagreed",
+    all_comments_sort_pct_passed: "% Passed",
+
+    // Lists: Narratives
+    narrative_hallucination_warning: "This narrative summary may contain hallucinations. Check each clause.",
+    narrative_error: "Error parsing narrative data",
+    consensus_narrative_title: "Consensus Across Groups",
+    groups_narrative_title: "Differences Between Groups",
+    uncertainty_narrative_title: "Areas of Uncertainty",
+
+    // Lists: Participant Groups
+    participant_groups_loading: "Loading Groups",
+    participant_groups_title: "Opinion Groups",
+    participant_groups_description: "Across {count} total participants, {groupCount} opinion groups emerged. There are two factors that define an opinion group. First, each opinion group is made up of a number of participants who tended to vote similarly on multiple statements. Second, each group of participants who voted similarly will have also voted distinctly differently from other groups.",
+
+    // App Errors
+    app_select_comments_error: "Select some comments",
+    app_select_comments_reject: "Currently, No comments are selected for display in the matrix.",
+    // Beeswarm
+    beeswarm_divisiveness_title: "How divisive was the conversation?",
+    beeswarm_divisiveness_desc: "Statements (here as little circles) to the left were voted on the same way—either everyone agreed or everyone disagreed. Statements to the right were divisive—participants were split between agreement and disagreement.",
+    beeswarm_usage_bold: "How to use this:",
+    beeswarm_usage_desc: " Hover to see the statement text. Start on the far right to find out what the most divisive statement was.",
+    beeswarm_consensus_label: "Consensus statements",
+    beeswarm_divisive_label: "Divisive statements",
+
+    // Participants Graph
+    participants_graph_title: "Graph",
+    participants_graph_subtitle: "Which statements were voted on similarly? How do participants relate to each other?",
+    participants_graph_description: "In this graph, statements are positioned more closely to statements which were voted on similarly. Participants, in turn, are positioned more closely to statements on which they agreed, and further from statements on which they disagreed. This means participants who voted similarly are closer together.",
+    participants_graph_btn_axes: "Axes",
+    participants_graph_btn_radial: "Radial axes",
+    participants_graph_btn_statements: "Statements",
+    participants_graph_btn_participants: "Participants (bucketized)",
+    participants_graph_btn_group_outline: "Group outline",
+    participants_graph_btn_group_labels: "Group labels",
+    participants_graph_click_hint: "Click a statement, identified by its number, to explore regions of the graph.",
+    // Comment
+    comment_agreed: "agreed",
+    comment_disagreed: "disagreed",
+    comment_passed: "passed",
+    comment_metadata: "Metadata: ",
 }
 
 export default s

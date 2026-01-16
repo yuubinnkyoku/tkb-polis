@@ -3,6 +3,7 @@ import * as globals from "../globals.js";
 import Narrative from "../narrative/index.jsx";
 import CommentList from "./commentList.jsx";
 import getNarrativeJSON from "../../util/getNarrativeJSON.js";
+import f from "../../strings/strings";
 const ConsensusNarrative = ({
   math,
   comments,
@@ -32,9 +33,9 @@ const ConsensusNarrative = ({
     const dedupedTids = [...new Set(uniqueTids || [])];
     return (
       <div>
-        <p style={globals.primaryHeading}> Consensus Across Groups </p>
+        <p style={globals.primaryHeading}> {f("consensus_narrative_title")} </p>
         <p style={globals.paragraph}>
-          This narrative summary may contain hallucinations. Check each clause.
+          {f("narrative_hallucination_warning")}
         </p>
         <Narrative sectionData={narrative} model={model} />
         {narrative.errors === undefined && (
@@ -60,7 +61,7 @@ const ConsensusNarrative = ({
     });
     return (
       <div>
-        <p>Error parsing narrative data</p>
+        <p>{f("narrative_error")}</p>
         <pre>{err.message}</pre>
       </div>
     );

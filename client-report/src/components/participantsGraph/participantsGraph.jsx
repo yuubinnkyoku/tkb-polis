@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import * as globals from "../globals.js";
+import f from "../../strings/strings";
 import graphUtil from "../../util/graphUtil.js";
 import Axes from "../graphAxes.jsx";
 import * as d3contour from "d3-contour";
@@ -37,11 +38,11 @@ const Participants = ({ points, math }) => {
         if (!pt || typeof pt.id === 'undefined') {
           return null;
         }
-        
+
         // Use safe radius calculation with fallback
         const count = baseClustersCount[pt.id] || 1;
         const radius = Math.sqrt(Math.max(count, 1)) * 3;
-        
+
         return (
           <g key={i}>
             <circle
@@ -51,10 +52,10 @@ const Participants = ({ points, math }) => {
               cx={pt.x || 0}
               cy={pt.y || 0}
             />
-            <text 
-              fill={globals.groupColor(pt.gid)} 
-              fillOpacity=".8" 
-              x={(pt.x || 0) - 5} 
+            <text
+              fill={globals.groupColor(pt.gid)}
+              fillOpacity=".8"
+              x={(pt.x || 0) - 5}
               y={(pt.y || 0) + 5}
             >
               {globals.groupSymbols[pt.gid] || ""}
@@ -123,15 +124,12 @@ const ParticipantsGraph = (props) => {
   return (
     <div style={{ position: "relative" }}>
       <div>
-        <p style={globals.primaryHeading}> Graph </p>
+        <p style={globals.primaryHeading}> {f("participants_graph_title")} </p>
         <p style={globals.paragraph}>
-          Which statements were voted on similarly? How do participants relate to each other?
+          {f("participants_graph_subtitle")}
         </p>
         <p style={globals.paragraph}>
-          In this graph, statements are positioned more closely to statements which were voted on
-          similarly. Participants, in turn, are positioned more closely to statements on which
-          they agreed, and further from statements on which they disagreed. This means
-          participants who voted similarly are closer together.
+          {f("participants_graph_description")}
         </p>
       </div>
       <div>
@@ -149,7 +147,7 @@ const ParticipantsGraph = (props) => {
             setShowAxes(a => !a);
           }}
         >
-          Axes
+          {f("participants_graph_btn_axes")}
         </button>
         <button
           style={{
@@ -165,7 +163,7 @@ const ParticipantsGraph = (props) => {
             setShowRadialAxes(ra => !ra);
           }}
         >
-          Radial axes
+          {f("participants_graph_btn_radial")}
         </button>
         <button
           style={{
@@ -181,7 +179,7 @@ const ParticipantsGraph = (props) => {
             setShowComments(c => !c)
           }}
         >
-          Statements
+          {f("participants_graph_btn_statements")}
         </button>
         <button
           style={{
@@ -197,7 +195,7 @@ const ParticipantsGraph = (props) => {
             setShowParticipants(p => !p);
           }}
         >
-          Participants (bucketized)
+          {f("participants_graph_btn_participants")}
         </button>
         <button
           style={{
@@ -213,7 +211,7 @@ const ParticipantsGraph = (props) => {
             setShowGroupOutline(g => !g);
           }}
         >
-          Group outline
+          {f("participants_graph_btn_group_outline")}
         </button>
         <button
           style={{
@@ -229,7 +227,7 @@ const ParticipantsGraph = (props) => {
             setShowGroupLabels(l => !l);
           }}
         >
-          Group labels
+          {f("participants_graph_btn_group_labels")}
         </button>
       </div>
 
@@ -245,7 +243,7 @@ const ParticipantsGraph = (props) => {
             voteColors={props.voteColors}
           />
         ) : (
-          <p>Click a statement, identified by its number, to explore regions of the graph.</p>
+          <p>{f("participants_graph_click_hint")}</p>
         )}
       </div>
 
@@ -331,14 +329,14 @@ const ParticipantsGraph = (props) => {
         ) : null}
         {showGroupOutline
           ? hulls.map((hull) => {
-              let gid = hull.group[0].gid;
-              if (typeof props.showOnlyGroup === 'number' && isFinite(props.showOnlyGroup)) {
-                if (gid !== props.showOnlyGroup) {
-                  return "";
-                }
+            let gid = hull.group[0].gid;
+            if (typeof props.showOnlyGroup === 'number' && isFinite(props.showOnlyGroup)) {
+              if (gid !== props.showOnlyGroup) {
+                return "";
               }
-              return <Hull key={gid} hull={hull} />;
-            })
+            }
+            return <Hull key={gid} hull={hull} />;
+          })
           : null}
         {showParticipants ? (
           <Participants math={props.math} points={baseClustersScaled} />
@@ -359,25 +357,25 @@ const ParticipantsGraph = (props) => {
         ) : null}
         {showGroupLabels
           ? props.math["group-clusters"].map((g, i) => {
-              // console.log('g',g )
-              return (
-                <text
-                  key={i}
-                  transform={`translate(
+            // console.log('g',g )
+            return (
+              <text
+                key={i}
+                transform={`translate(
                       ${xx(g.center[0])},
                       ${yy(g.center[1])}
                     )`}
-                  style={{
-                    fill: "rgba(0,0,0,.5)",
-                    fontFamily: "Helvetica",
-                    fontWeight: 700,
-                    fontSize: 18,
-                  }}
-                >
-                  {globals.groupLabels[g.id]}
-                </text>
-              );
-            })
+                style={{
+                  fill: "rgba(0,0,0,.5)",
+                  fontFamily: "Helvetica",
+                  fontWeight: 700,
+                  fontSize: 18,
+                }}
+              >
+                {globals.groupLabels[g.id]}
+              </text>
+            );
+          })
           : null}
         {props.consensusDivisionColorScale ? (
           <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">

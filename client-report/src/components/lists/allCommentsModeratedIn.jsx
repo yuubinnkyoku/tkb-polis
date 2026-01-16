@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import CommentList from "./commentList.jsx";
 import * as globals from "../globals";
+import f from "../../strings/strings";
 
 
 const sortFunctions = {
@@ -24,27 +25,27 @@ const allCommentsModeratedIn = ({ conversation, ptptCount, math, formatTid, comm
 
 
   if (!conversation) {
-    return <div>Loading allCommentsModeratedIn...</div>
+    return <div>{f("all_comments_loading")}</div>
   }
 
   const sortFunction = sortFunctions[sortStyle] || sortFunctions["tid"];
 
   return (
     <div>
-      <p style={globals.primaryHeading}> All statements </p>
+      <p style={globals.primaryHeading}> {f("all_comments_title")} </p>
       <p style={globals.paragraph}>
-        Group votes across all statements, excluding those statements which were moderated out.
+        {f("all_comments_description")}
       </p>
-      <label htmlFor="allCommentsSortMode">Sort by: </label>
+      <label htmlFor="allCommentsSortMode">{f("all_comments_sort_label")}</label>
       <select id="allCommentsSortMode" onChange={onSortChanged} value={sortStyle}>
-        <option value="tid">Statement Id</option>
-        <option value="consensus">Group-informed Consensus</option>
-        <option value="numvotes">Number of votes</option>
-        <option value="pctAgreed">% Agreed</option>
-        <option value="pctDisagreed">% Disagreed</option>
-        <option value="pctPassed">% Passed</option>
+        <option value="tid">{f("all_comments_sort_tid")}</option>
+        <option value="consensus">{f("all_comments_sort_consensus")}</option>
+        <option value="numvotes">{f("all_comments_sort_numvotes")}</option>
+        <option value="pctAgreed">{f("all_comments_sort_pct_agreed")}</option>
+        <option value="pctDisagreed">{f("all_comments_sort_pct_disagreed")}</option>
+        <option value="pctPassed">{f("all_comments_sort_pct_passed")}</option>
       </select>
-      <div style={{marginTop: 50}}>
+      <div style={{ marginTop: 50 }}>
         <CommentList
           conversation={conversation}
           ptptCount={ptptCount}
@@ -52,7 +53,7 @@ const allCommentsModeratedIn = ({ conversation, ptptCount, math, formatTid, comm
           formatTid={formatTid}
           tidsToRender={sortFunction(comments)}
           comments={comments}
-          voteColors={voteColors}/>
+          voteColors={voteColors} />
       </div>
     </div>
   );

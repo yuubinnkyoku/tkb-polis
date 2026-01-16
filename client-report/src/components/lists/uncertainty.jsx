@@ -5,6 +5,7 @@ import CommentList from "./commentList.jsx";
 import * as globals from "../globals.js";
 // import style from "../../util/style";
 import Narrative from "../narrative/index.jsx";
+import f from "../../strings/strings";
 
 const Uncertainty = ({
   conversation,
@@ -17,17 +18,16 @@ const Uncertainty = ({
   narrative,
 }) => {
   if (!conversation) {
-    return <div>Loading Uncertainty...</div>;
+    return <div>{f("uncertainty_loading")}</div>;
   }
   return (
     <div>
-      <p style={globals.primaryHeading}> Areas of uncertainty </p>
+      <p style={globals.primaryHeading}> {f("uncertainty_title")} </p>
       <p style={globals.paragraph}>
-        Across all {ptptCount} participants, there was uncertainty about the following statements.
-        Greater than 30% of participants who saw these statements &apos;passed&apos;.
+        {f("uncertainty_description", { count: ptptCount })}
       </p>
       <p style={globals.paragraph}>
-        Areas of uncertainty can provide avenues to educate and open dialogue with your community.
+        {f("uncertainty_subtitle")}
       </p>
       <div style={{ marginTop: 50 }}>
         <CommentList
