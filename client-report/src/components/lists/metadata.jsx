@@ -3,10 +3,11 @@
 import React from "react";
 import CommentList from "./commentList.jsx";
 import * as globals from "../globals.js";
+import f from "../../strings/strings";
 
 const Metadata = ({ conversation, comments, ptptCount, formatTid, math, voteColors }) => {
   if (!conversation) {
-    return <div>Loading Metadata...</div>;
+    return <div>{f("metadata_loading")}</div>;
   }
 
   const _metadataTids = [];
@@ -23,10 +24,9 @@ const Metadata = ({ conversation, comments, ptptCount, formatTid, math, voteColo
 
   return (
     <div>
-      <p style={globals.primaryHeading}> Metadata </p>
+      <p style={globals.primaryHeading}> {f("metadata_title")} </p>
       <p style={globals.paragraph}>
-        The demographic breakdown of each group, as self reported by agreeing and disagreeing on
-        statements marked &apos;metadata&apos; by moderators.
+        {f("metadata_desc")}
       </p>
       <div style={{ marginTop: 50 }}>
         <CommentList

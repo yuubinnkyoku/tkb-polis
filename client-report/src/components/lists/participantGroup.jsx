@@ -3,6 +3,7 @@
 import React from "react";
 import * as globals from "../globals.js";
 import CommentList from "./commentList.jsx";
+import f from "../../strings/strings";
 
 const ParticipantGroup = ({
   gid,
@@ -19,7 +20,7 @@ const ParticipantGroup = ({
 
   let groupLabel = groupName;
   if (typeof groupLabel === "undefined") {
-    groupLabel = "Group " + globals.groupLabels[gid];
+    groupLabel = f("group_label_prefix") + globals.groupLabels[gid];
   }
 
   return (
@@ -28,9 +29,9 @@ const ParticipantGroup = ({
         width: "100%",
       }}>
       <p style={globals.secondaryHeading}>
-        {groupLabel}: {groupVotesForThisGroup["n-members"]} participants
+        {groupLabel}: {groupVotesForThisGroup["n-members"]} {f("participant_group_participants")}
       </p>
-      <p style={globals.paragraph}> Statements which make this group unique, by their votes: </p>
+      <p style={globals.paragraph}> {f("participant_group_unique_statements")} </p>
       <CommentList
         conversation={conversation}
         ptptCount={ptptCount}
@@ -38,7 +39,7 @@ const ParticipantGroup = ({
         formatTid={formatTid}
         tidsToRender={groupComments.map(c => c.tid)}
         comments={comments}
-        voteColors={voteColors}/>
+        voteColors={voteColors} />
     </div>
   );
 };
